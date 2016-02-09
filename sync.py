@@ -70,6 +70,12 @@ def main(host, config_file, rsync_options, dryrun):
 		if not host in config:
 			print("No host {} is known in {}. Please edit the file!".format(host, configFilename))
 			exit()
+	if not "hostname" in config[host]:
+		print("The host entry {} does not have a hostname. Please edit {}!".format(host, configFilename))
+		exit()
+	if not "remote_folder" in config[host]:
+		print("The host entry {} does not have a remote folder location. Please edit {}!".format(host, configFilename))
+		exit()
 	sync(config[host], currentDir, rsync_options, dryrun)
 
 if __name__ == '__main__':
