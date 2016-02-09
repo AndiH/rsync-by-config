@@ -1,4 +1,10 @@
-[juhydra]
-	hostname = "juhydra"
+[firsthost]
+	hostname = "first"
 	remote_folder = "/something/"
 	rsync_options = ["--delete", "--update"]
+
+[secondhost]
+	hostname = "second"
+	remote_folder = "/something/"
+	rsync_options = []
+	default = true
