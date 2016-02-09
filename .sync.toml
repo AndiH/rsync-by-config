@@ -1,0 +1,4 @@
+[juhydra]
+	hostname = "juhydra"
+	remote_folder = "/something/"
+	rsync_options = ["--delete", "--update"]
