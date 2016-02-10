@@ -4,6 +4,8 @@ I'm unable to remember the `rsync` options I usually need for transferring files
 
 ## Getting Started
 
+### Without `pip`
+
 ```bash
 cd ~/bin/
 git clone https://github.com/AndiH/simpler-rsync.git
@@ -11,7 +13,19 @@ ln -s simpler-rsync/sync.py
 sync.py --help
 ```
 
-You should insert `~/bin/` into your `$PATH`, e.g. via `export PATH=$HOME/bin/:$PATH` so you can use `sync.py` globally from any folder.
+You should insert `~/bin/` into your `$PATH`, e.g. via `export PATH=$HOME/bin/:$PATH` so you can use `sync.py` globally from any folder. If `sync.py` does not run, make sure to have installed all [dependencies](#dependencies).
+
+### With `pip`
+I tried my hand on using setuptools to offer an installation of `sync.py`. It should work, though I'm on thin ice here…
+
+```bash
+cd $TMPDIR
+git clone https://github.com/AndiH/simpler-rsync.git
+cd simpler-rsync
+pip install .
+```
+
+You should now have a script called `sync.py` available; also, all dependencies should have been installed in the process.
 
 ## Options
 `sync.py` reads from a configuration file in the current directory. Depending on the parameters specified there, the content of the current directory is copied to a remote location using `rsync`.
