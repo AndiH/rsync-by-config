@@ -79,4 +79,4 @@ def main(host, config_file, rsync_options, dryrun):
 	sync(config[host], currentDir, rsync_options, dryrun)
 
 if __name__ == '__main__':
-	main()
+	main(auto_envvar_prefix='SRSYNC')

@@ -37,6 +37,13 @@ The Python script has a few command line options, all documented via `./sync.py 
 * **`--dryrun`**: Calls `rsync` with `--dryrun`, preventing all actual copies. Good for testing.
 * **`--rsync_options="--something"`**: Propagate `--something` to `rsync` as an additional option. Can be invoked multiple times. Shorthand: `-o`. The `rsync` option is given in addition to the basic, default options hardcoded into the script file and in addition to the options defined in the config file.
 
+To specify values for the options globally, environment values can be set. This is handy if you don't like my choice of calling the default config file `.sync.toml` (see below) and want to change it. The command line options (at least the last three from the list above) are accessible as environment variables with a `SRSYNC_` prefix, thanks to [Click](http://click.pocoo.org/). So, for example, to rename the default config file, do:
+
+```bash
+export SRSYNC_CONFIG_FILE=.my.toml
+sync.py somehost
+```
+
 ## Config File
 The config file used for Simpler Rsync is written in [TOML](https://github.com/toml-lang/toml). One entry in the config file is for one remote location. The config file is structured as follows.
 
