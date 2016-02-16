@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/local/opt/python/bin/python2.7
 # sync.py by Andreas Herten, Feb 2016
 
 import os
@@ -76,7 +76,14 @@ def main(host, config_file, rsync_options, dryrun):
 	if not "remote_folder" in config[host]:
 		print("The host entry {} does not have a remote folder location. Please edit {}!".format(host, configFilename))
 		exit()
-	sync(config[host], currentDir, rsync_options, dryrun)
+	localDir = currentDir
+	if config[host].has_key('local_folder'):
+		print(config[host]['local_folder'])
+		if not (os.path.isdir(config[host]['local_folder']) and os.path.exists(config[host]['local_folder'])):
+			print("You specified the local folder {} to be synced. This folder does not exist!".format(config[host]['local_folder']))
+			exit()
+		localDir = config[host]['local_folder']
+	sync(config[host], localDir, rsync_options, dryrun)
 
 if __name__ == '__main__':
 	main(auto_envvar_prefix='SRSYNC')
