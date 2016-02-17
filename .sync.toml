@@ -6,5 +6,12 @@
 [secondhost]
 	hostname = "second"
 	remote_folder = "/something/"
-	rsync_options = []
+	rsync_options = ["-v"]
 	default = true
+
+[inversehost]
+	hostname = "second"
+	local_folder = "/some/thing/"
+	remote_folder = "/some/thang/"
+	gather = true
+	rsync_options = ["--update"]

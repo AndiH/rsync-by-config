@@ -6,7 +6,7 @@ import click
 import toml
 from sh import rsync
 
-def sync(host_toml, currentDir, rsync_options, dryrun):
+def sync(host_toml, localDir, rsync_options, dryrun, gather):
 	rsync_opts = []
 	rsync_opts.append("--archive")  # archive
 	# rsync_opts.append("--update")  # skip files that are newer on the receiver
@@ -26,8 +26,11 @@ def sync(host_toml, currentDir, rsync_options, dryrun):
 	for option in rsync_options:
 		rsync_opts.append(str(option))
 
-	sourceDir = "."
+	sourceDir = localDir + "/"  # make sure it has a trailing slash, for rsync
 	destDir = str(host_toml['hostname']) + ":" + host_toml['remote_folder']
+
+	if gather:
+		sourceDir, destDir = destDir, sourceDir
 
 	print(rsync(rsync_opts, sourceDir, destDir))
 
@@ -51,7 +54,11 @@ def main(host, config_file, rsync_options, dryrun):
 		hostname = \"remotecomputer\"\n
 		remote_folder = \"/user/myuser/directory/\"\n
 		rsync_options = [\"--a\", \"--b\"]\n
-		default = true"""
+		default = true
+
+	Additional config keywords are:\n
+		* local_folder: Explicitly set the source directory to this value\n
+		* gather: If true, switches the order of source and destination."""
 	configFilename = config_file
 	currentDir = os.getcwd()
 	configFile = os.path.join(currentDir, configFilename)
@@ -83,7 +90,10 @@ def main(host, config_file, rsync_options, dryrun):
 			print("You specified the local folder {} to be synced. This folder does not exist!".format(config[host]['local_folder']))
 			exit()
 		localDir = config[host]['local_folder']
-	sync(config[host], localDir, rsync_options, dryrun)
+	gather = False
+	if config[host].has_key('gather'):
+		gather = True
+	sync(config[host], localDir, rsync_options, dryrun, gather)
 
 if __name__ == '__main__':
 	main(auto_envvar_prefix='SRSYNC')
