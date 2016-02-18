@@ -6,7 +6,7 @@ import click
 import toml
 from sh import rsync
 
-def sync(host_toml, localDir, rsync_options, dryrun, gather):
+def sync(host_toml, localDir, rsync_options, dryrun, gather, config_file):
 	rsync_opts = []
 	rsync_opts.append("--archive")  # archive
 	# rsync_opts.append("--update")  # skip files that are newer on the receiver
@@ -18,6 +18,7 @@ def sync(host_toml, localDir, rsync_options, dryrun, gather):
 	# rsync_opts.append("--delete")  # delete extraneous files from dest dirs
 	# rsync_opts.append('--filter=\"dir-merge,- .gitignore\"')
 	rsync_opts.append('--exclude=*.bin')
+	rsync_opts.append('--exclude=' + config_file)
 	if dryrun:
 		rsync_opts.append("--dry-run")  # no transfer, just report
 	if host_toml.has_key('rsync_options'):
@@ -69,7 +70,7 @@ def main(host, config_file, rsync_options, dryrun):
 	if host == "":
 		host = config.keys()[-1]
 		for h in config:
-			print h
+			print("Remote server: {}".format(h))
 			if config[h].has_key("default"):
 				if config[h]["default"] == True:
 					host = h
@@ -93,7 +94,7 @@ def main(host, config_file, rsync_options, dryrun):
 	gather = False
 	if config[host].has_key('gather'):
 		gather = True
-	sync(config[host], localDir, rsync_options, dryrun, gather)
+	sync(config[host], localDir, rsync_options, dryrun, gather, config_file)
 
 if __name__ == '__main__':
 	main(auto_envvar_prefix='SRSYNC')
