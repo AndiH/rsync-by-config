@@ -70,10 +70,10 @@ def main(host, config_file, rsync_options, dryrun):
 	if host == "":
 		host = config.keys()[-1]
 		for h in config:
-			print("Remote server: {}".format(h))
 			if config[h].has_key("default"):
 				if config[h]["default"] == True:
 					host = h
+					print("Using remote server: {}".format(h))
 	else:
 		if not host in config:
 			print("No host {} is known in {}. Please edit the file!".format(host, configFilename))
