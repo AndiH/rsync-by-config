@@ -77,6 +77,9 @@ def main(host, config_file, rsync_options, dryrun):
 	else:
 		if not host in config:
 			print("No host {} is known in {}. Please edit the file!".format(host, configFilename))
+			print("Specified hosts are:")
+			for h in config:
+				print("\t {}".format(h))
 			exit()
 	if not "hostname" in config[host]:
 		print("The host entry {} does not have a hostname. Please edit {}!".format(host, configFilename))

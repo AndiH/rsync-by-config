@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
 	name='simpler-rsync',
-	version='1.2c',
+	version='1.3',
 	author='Andreas Herten',
 	url='https://github.com/AndiH/simpler-rsync',
 	# py_modules=['simpler-rsync'],
