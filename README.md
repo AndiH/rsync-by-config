@@ -1,8 +1,10 @@
-# Simpler rsync
+# Simpler Rsync
 
 I'm unable to remember the `rsync` options I usually need for transferring files to a remote location. Also, I'm too lazy to memorize the remote path. So I made a wrapper around `rsync` which reads from a config file in the current directory.
 
 ## Getting Started
+
+You can install Simpler Rsync either manually or with `pip install`. The latter works great for me, but is not well tested beyond my OS X setups.
 
 ### Without `pip`
 
