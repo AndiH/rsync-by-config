@@ -52,14 +52,14 @@ def loadConfig(filename):
 @click.option("--rsync_options", "-o", default="", type=str, multiple=True, help="Additional options to call rsync with.")
 @click.option("--dryrun", is_flag=True, help="Call rsync as a dry run.")
 @click.option("--verbose", is_flag=True, help="Run with output information.")
-@click.argument('host', default="")
-def main(host, config_file, rsync_options, dryrun, verbose):
-	"""Use the entry of HOST in config_file to synchronize the files of the current directory to. If HOST is not specified, the entry of config_file with 'default = true' is taken. If no default host is specified, some host is taken (which might be the first in the config file, but does not need to be).
+@click.argument('entry', default="")
+def main(entry, config_file, rsync_options, dryrun, verbose):
+	"""Use the entry of ENTRY in config_file to synchronize the files of the current directory to. If ENTRY is not specified, the entry of config_file with 'default = true' is taken. If no default entry is specified, some entry is taken (which might be the first in the config file, but does not need to be).
 
 
 	The structure of the config file should be of the following:
 
-	[host]\n
+	[entry]\n
 		hostname = \"remotecomputer\"\n
 		remote_folder = \"/user/myuser/directory/\"\n
 		rsync_options = [\"--a\", \"--b\"]\n
@@ -79,51 +79,52 @@ def main(host, config_file, rsync_options, dryrun, verbose):
 	config = loadConfig(configFile)
 	if verbose:
 		print("# Loaded config file {}".format(configFile))
-	if host == "":
+	if entry == "":
 		if verbose:
-			print("# No host was explicitly specified; trying to determine from config file")
-		host = config.keys()[-1]
-		for h in config:
-			if "default" in config[h]:
-				if config[h]["default"] is True:
-					host = h
-					print("# Found default remote server {}".format(h))
-					print("Using remote server: {}".format(h))
+			print("# No entry was explicitly specified; trying to determine from config file")
+		entry = config.keys()[-1]
+		for en in config:
+			if "default" in config[en]:
+				if config[en]["default"] is True:
+					entry = en
+					print("# Found default entry {}".format(en))
+					print("Using entry: {}".format(en))
 	else:
-		if host not in config:
-			print("No host {} is known in {}. Please edit the file!".format(host, configFilename))
-			print("Specified hosts are:")
-			for h in config:
-				print("\t {}".format(h))
+		if entry not in config:
+			print("No entry {} is known in {}. Please edit the file!".format(entry, configFilename))
+			print("Specified entries are:")
+			for en in config:
+				print("\t {}".format(en))
 			exit()
 	if verbose:
-		print("# Using host entry {}".format(host))
-	if "hostname" not in config[host]:
-		print("The host entry {} does not have a hostname. Please edit {}!".format(host, configFilename))
+		print("# Using entry {}".format(entry))
+	entry_toml = config[entry]
+	if "hostname" not in entry_toml:
+		print("The entry {} does not have a hostname. Please edit {}!".format(entry, configFilename))
 		exit()
 	if verbose:
-		print("# The remote host name is {}".format(config[host]['hostname']))
-	if not "remote_folder" in config[host]:
-		print("The host entry {} does not have a remote folder location. Please edit {}!".format(host, configFilename))
+		print("# The remote hostname is {}".format(entry_toml['hostname']))
+	if not "remote_folder" in entry_toml:
+		print("The entry {} does not have a remote folder location. Please edit {}!".format(entry, configFilename))
 		exit()
 	if verbose:
-		print("# The remote folder path is {}".format(config[host]['remote_folder']))
+		print("# The remote folder path is {}".format(entry_toml['remote_folder']))
 	localDir = currentDir
-	if 'local_folder' in config[host]:
-		if not (os.path.isdir(config[host]['local_folder']) and os.path.exists(config[host]['local_folder'])):
-			print("You specified the local folder {} to be synced. This folder does not exist!".format(config[host]['local_folder']))
+	if 'local_folder' in entry_toml:
+		if not (os.path.isdir(entry_toml['local_folder']) and os.path.exists(entry_toml['local_folder'])):
+			print("You specified the local folder {} to be synced. This folder does not exist!".format(entry_toml['local_folder']))
 			exit()
-		localDir = config[host]['local_folder']
+		localDir = entry_toml['local_folder']
 		if verbose:
 			print("# Running with explicit local folder {}".format(localDir))
 	if verbose:
 		print("# Using local folder {}".format(localDir))
 	gather = False
-	if 'gather' in config[host]:
+	if 'gather' in entry_toml:
 		if verbose:
 			print("# --gather is turned ON! Collecting to {}".format(localDir))
 		gather = True
-	sync(config[host], localDir, rsync_options, dryrun, gather, config_file, verbose)
+	sync(entry_toml, localDir, rsync_options, dryrun, gather, config_file, verbose)
 
 if __name__ == '__main__':
 	main(auto_envvar_prefix='SRSYNC')
