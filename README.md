@@ -86,6 +86,14 @@ Simpler Rsync also supports transfers from a remote host to the local machine (a
 
 The `gather` option is the important one. It switches the order of source and destination in the underlying `rsync` call.
 
+### Local Transfers
+For copying on the same machine, Simpler Rsync supports *host-less* operations between a source directory and a target directory. This mode is enabled if the `hostname` key of the respective entry in the config file is missing. In this case, the script also checks for `remote_folder` to be a valid directory on the current machine (despite the name). Example config file:
+
+```toml
+[localstuff]
+    remote_folder = "/dev/null/"
+```
+
 ## Dependencies
 Some Python packages are required for Simpler Rsync. All can be installed with `pip`:
 

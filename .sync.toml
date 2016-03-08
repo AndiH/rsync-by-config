@@ -15,3 +15,6 @@
 	remote_folder = "/some/thang/"
 	gather = true
 	rsync_options = ["--update"]
+
+[localsync]
+	remote_folder = "/somewhere/over/there"

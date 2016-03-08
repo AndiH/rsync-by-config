@@ -7,7 +7,7 @@ import click
 import toml
 from sh import rsync
 
-def sync(host_toml, localDir, rsync_options, dryrun, gather, config_file, verbose):
+def sync(host_toml, localDir, destDir, rsync_options, dryrun, gather, config_file, verbose):
 	rsync_opts = []
 	rsync_opts.append("--archive")  # archive
 	# rsync_opts.append("--update")  # skip files that are newer on the receiver
@@ -34,7 +34,8 @@ def sync(host_toml, localDir, rsync_options, dryrun, gather, config_file, verbos
 		print("# All rsync options: {}".format(rsync_opts))
 
 	sourceDir = localDir + "/"  # make sure it has a trailing slash, for rsync
-	destDir = str(host_toml['hostname']) + ":" + host_toml['remote_folder']
+	if 'hostname' in host_toml:
+		destDir = str(host_toml['hostname']) + ":" + destDir
 
 	if gather:
 		sourceDir, destDir = destDir, sourceDir
@@ -68,21 +69,24 @@ def main(entry, config_file, rsync_options, dryrun, verbose):
 	Additional config keywords are:\n
 		* local_folder: Explicitly set the source directory to this value\n
 		* gather: If true, switches the order of source and destination."""
+
 	if verbose:
 		print('# Running {} in verbose mode. All verbosity commands are prefixed with #. Current datetime: {}'.format(os.path.basename(__file__), datetime.now()))
+
 	configFilename = config_file
 	currentDir = os.getcwd()
 	configFile = os.path.join(currentDir, configFilename)
 	if not os.path.isfile(configFile):
 		print("Please make sure {} exists in the current directory!".format(configFilename))
 		exit()
+	## Configuration file parsing
 	config = loadConfig(configFile)
 	if verbose:
 		print("# Loaded config file {}".format(configFile))
 	if entry == "":
 		if verbose:
 			print("# No entry was explicitly specified; trying to determine from config file")
-		entry = config.keys()[-1]
+		entry = list(config.keys())[-1]
 		for en in config:
 			if "default" in config[en]:
 				if config[en]["default"] is True:
@@ -99,32 +103,43 @@ def main(entry, config_file, rsync_options, dryrun, verbose):
 	if verbose:
 		print("# Using entry {}".format(entry))
 	entry_toml = config[entry]
-	if "hostname" not in entry_toml:
-		print("The entry {} does not have a hostname. Please edit {}!".format(entry, configFilename))
-		exit()
+	## Source directory parsing
+	localDir = currentDir
+	if 'local_folder' in entry_toml:
+		if not (os.path.isdir(entry_toml['local_folder']) and os.path.exists(entry_toml['local_folder'])):
+			print("You specified the source folder {} to be synced. This folder does not exist!".format(entry_toml['local_folder']))
+			exit()
+		localDir = entry_toml['local_folder']
+		if verbose:
+			print("# Running with explicit source folder {}".format(localDir))
 	if verbose:
-		print("# The remote hostname is {}".format(entry_toml['hostname']))
+		print("# Using source folder {}".format(localDir))
+	## Target directory parsing
 	if not "remote_folder" in entry_toml:
 		print("The entry {} does not have a remote folder location. Please edit {}!".format(entry, configFilename))
 		exit()
 	if verbose:
 		print("# The remote folder path is {}".format(entry_toml['remote_folder']))
-	localDir = currentDir
-	if 'local_folder' in entry_toml:
-		if not (os.path.isdir(entry_toml['local_folder']) and os.path.exists(entry_toml['local_folder'])):
-			print("You specified the local folder {} to be synced. This folder does not exist!".format(entry_toml['local_folder']))
-			exit()
-		localDir = entry_toml['local_folder']
+	### Target = remote OR target = local?
+	destDir = entry_toml['remote_folder']
+	if "hostname" not in entry_toml:
 		if verbose:
-			print("# Running with explicit local folder {}".format(localDir))
-	if verbose:
-		print("# Using local folder {}".format(localDir))
+			print("# No hostname specified. Targeting local transfers.")
+		if not (os.path.isdir(destDir) and os.path.exists(destDir)):
+			print("You specified the target folder {} to be synced to. This folder does not exist!".format(destDir))
+			exit()
+		if verbose:
+			print("# Running with local target folder {}".format(destDir))
+	if "hostname" in entry_toml:
+		if verbose:
+			print("# The remote hostname is {}".format(entry_toml['hostname']))
+	## Invert source and target?
 	gather = False
 	if 'gather' in entry_toml:
 		if verbose:
 			print("# --gather is turned ON! Collecting to {}".format(localDir))
 		gather = True
-	sync(entry_toml, localDir, rsync_options, dryrun, gather, config_file, verbose)
+	sync(entry_toml, localDir, destDir, rsync_options, dryrun, gather, config_file, verbose)
 
 if __name__ == '__main__':
 	main(auto_envvar_prefix='SRSYNC')
