@@ -18,7 +18,15 @@ sync.py --help
 You should insert `~/bin/` into your `$PATH`, e.g. via `export PATH=$HOME/bin/:$PATH` so you can use `sync.py` globally from any folder. If `sync.py` does not run, make sure to have installed all [dependencies](#dependencies).
 
 ### With `pip`
-I tried my hand on using setuptools to offer an installation of `sync.py`. It should work, though I'm on thin ice here…
+This all-important one-liner should take care of pretty much everything:
+
+```bash
+pip install https://github.com/AndiH/simpler-rsync/archive/master.zip
+```
+
+You should have a command `sync.py` no available in your shell. In the process, all dependencies should be installed as well. (This is the first time I tried setuptools, so let me know if something is not working). 
+
+More manually, you could clone into some temporary directory and call `pip` into that directory:
 
 ```bash
 cd $TMPDIR
@@ -26,8 +34,6 @@ git clone https://github.com/AndiH/simpler-rsync.git
 cd simpler-rsync
 pip install .
 ```
-
-You should now have a script called `sync.py` available; also, all dependencies should have been installed in the process.
 
 ## Options
 `sync.py` reads from a configuration file in the current directory. Depending on the parameters specified there, the content of the current directory is copied to a target location using `rsync`.
