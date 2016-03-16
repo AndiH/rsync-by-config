@@ -4,18 +4,7 @@ I'm unable to remember the `rsync` options I usually need for transferring files
 
 ## Getting Started
 
-You can install Simpler Rsync either manually or with `pip install`. The latter works great for me, but is not well tested beyond my OS X setups.
-
-### Without `pip`
-
-```bash
-cd ~/bin/
-git clone https://github.com/AndiH/simpler-rsync.git
-ln -s simpler-rsync/sync.py
-sync.py --help
-```
-
-You should insert `~/bin/` into your `$PATH`, e.g. via `export PATH=$HOME/bin/:$PATH` so you can use `sync.py` globally from any folder. If `sync.py` does not run, make sure to have installed all [dependencies](#dependencies).
+You can install Simpler Rsync either with `pip install` or manually. The former works great for me, but is not well tested beyond my OS X setups.
 
 ### With `pip`
 This all-important one-liner should take care of pretty much everything:
@@ -34,6 +23,17 @@ git clone https://github.com/AndiH/simpler-rsync.git
 cd simpler-rsync
 pip install .
 ```
+
+### Without `pip`
+
+```bash
+cd ~/bin/
+git clone https://github.com/AndiH/simpler-rsync.git
+ln -s simpler-rsync/sync.py
+sync.py --help
+```
+
+You should insert `~/bin/` into your `$PATH`, e.g. via `export PATH=$HOME/bin/:$PATH` so you can use `sync.py` globally from any folder. If `sync.py` does not run, make sure to have installed all [dependencies](#dependencies).
 
 ## Options
 `sync.py` reads from a configuration file in the current directory. Depending on the parameters specified there, the content of the current directory is copied to a target location using `rsync`.
