@@ -66,9 +66,11 @@ def main(entry, config_file, rsync_options, dryrun, verbose):
 		rsync_options = [\"--a\", \"--b\"]\n
 		default = true
 
-	Additional config keywords are:\n
+	Additional keywords for an entry in a config file are:\n
 		* local_folder: Explicitly set the source directory to this value\n
-		* gather: If true, switches the order of source and destination."""
+		* gather: If true, switches the order of source and destination.
+
+	For a full list of options see https://github.com/AndiH/simpler-rsync"""
 
 	if verbose:
 		print('# Running {} in verbose mode. All verbosity commands are prefixed with #. Current datetime: {}'.format(os.path.basename(__file__), datetime.now()))
@@ -81,8 +83,18 @@ def main(entry, config_file, rsync_options, dryrun, verbose):
 		exit()
 	## Configuration file parsing
 	config = loadConfig(configFile)
+	rsync_options = list(rsync_options)
 	if verbose:
 		print("# Loaded config file {}".format(configFile))
+	# Globals
+	if "rsync_options" in config:
+		if verbose:
+			print("# A global rsync_options key is given in the config file.")
+		for option in config["rsync_options"]:
+			rsync_options.append(str(option))
+		if verbose:
+			print("# List of rsync options due to command line and global key in config file: {}".format(rsync_options))
+	# Try to determine which entry to take from the config file
 	if entry == "":
 		if verbose:
 			print("# No entry was explicitly specified; trying to determine from config file")

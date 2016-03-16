@@ -1,3 +1,5 @@
+rsync_options = ["-v"]
+
 [firsthost]
 	hostname = "first"
 	remote_folder = "/something/"

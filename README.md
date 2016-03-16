@@ -72,6 +72,16 @@ The available keys are:
 
 **Note**: Soon™, `remote_folder` and `local_folder` will be renamed to `target_folder` and `source_folder`, respectively, to better the reflect the recent changes in the script.
 
+Additionally to the parameters of an entry, *global* parameters true for all entries in the config file can be specified. The parameters need to be specified before the first entry occurs. Currently, only `rsync_options` is supported. Example:
+
+```toml
+rsync_options = ['-v']
+
+[firsthost]
+    hostname = "first"
+    # etc
+```
+
 ### Inverse Transfers (Gathering)
 Simpler Rsync also supports transfers from a remote host to the local machine (a gathering operation). An entry in the config file as an example looks like this:
 
