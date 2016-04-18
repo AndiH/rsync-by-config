@@ -1,5 +1,5 @@
 #!/usr/local/opt/python/bin/python2.7
-# sync.py by Andreas Herten, Feb 2016
+# sync.py by Andreas Herten, Feb+ 2016
 
 import os
 from datetime import datetime
@@ -62,12 +62,12 @@ def main(entry, config_file, rsync_options, dryrun, verbose):
 
 	[entry]\n
 		hostname = \"remotecomputer\"\n
-		remote_folder = \"/user/myuser/directory/\"\n
+		target_folder = \"/user/myuser/directory/\"\n
 		rsync_options = [\"--a\", \"--b\"]\n
 		default = true
 
 	Additional keywords for an entry in a config file are:\n
-		* local_folder: Explicitly set the source directory to this value\n
+		* source_folder: Explicitly set the source directory to this value\n
 		* gather: If true, switches the order of source and destination.
 
 	For a full list of options see https://github.com/AndiH/simpler-rsync"""
@@ -117,28 +117,37 @@ def main(entry, config_file, rsync_options, dryrun, verbose):
 	entry_toml = config[entry]
 	## Source directory parsing
 	localDir = currentDir
-	if 'local_folder' in entry_toml:
-		if not (os.path.isdir(entry_toml['local_folder']) and os.path.exists(entry_toml['local_folder'])):
-			print("You specified the source folder {} to be synced. This folder does not exist!".format(entry_toml['local_folder']))
+	if ('local_folder' or 'source_folder') in entry_toml:
+		if 'source_folder' in entry_toml:
+			localDirUntested = entry_toml['source_folder']
+		else:
+			print("Warning: Key `local_folder` is deprecated. Please use `source_folder`!\nThe following command will in-place modify the file:\n\tsed -i -- 's/local_folder/source_folder/g' {}".format(configFilename))
+			localDirUntested = entry_toml['local_folder']
+		if not (os.path.isdir(localDirUntested) and os.path.exists(localDirUntested)):
+			print("You specified the source folder {} to be synced. This folder does not exist!".format(localDirUntested))
 			exit()
-		localDir = entry_toml['local_folder']
+		localDir = localDirUntested
 		if verbose:
 			print("# Running with explicit source folder {}".format(localDir))
 	if verbose:
 		print("# Using source folder {}".format(localDir))
 	## Target directory parsing
-	if not "remote_folder" in entry_toml:
-		print("The entry {} does not have a remote folder location. Please edit {}!".format(entry, configFilename))
+	if (not "remote_folder" or not "target_folder") in entry_toml:
+		print("The entry {} does not have a target folder location. Please edit {}!".format(entry, configFilename))
 		exit()
+	if "remote_folder" in entry_toml:
+		print("Warning: Key `remote_folder` is deprecated. Please use `target_folder`!\nThe following command will in-place modify the file:\n\tsed -i -- 's/remote_folder/target_folder/g' {}".format(configFilename))
+		destDir = entry_toml['remote_folder']
+	if "target_folder" in entry_toml:
+		destDir = entry_toml['target_folder']
 	if verbose:
-		print("# The remote folder path is {}".format(entry_toml['remote_folder']))
+		print("# The target folder path is {}".format(destDir))
 	### Target = remote OR target = local?
-	destDir = entry_toml['remote_folder']
 	if "hostname" not in entry_toml:
 		if verbose:
 			print("# No hostname specified. Targeting local transfers.")
 		if not (os.path.isdir(destDir) and os.path.exists(destDir)):
-			print("You specified the target folder {} to be synced to. This folder does not exist!".format(destDir))
+			print("You specified the target folder {}. This folder does not exist!".format(destDir))
 			exit()
 		if verbose:
 			print("# Running with local target folder {}".format(destDir))
