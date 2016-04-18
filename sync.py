@@ -1,4 +1,4 @@
-#!/usr/local/opt/python/bin/python2.7
+#!/usr/bin/env python
 # sync.py by Andreas Herten, Feb+ 2016
 
 import os
