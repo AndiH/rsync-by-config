@@ -59,24 +59,24 @@ The config file used for Simpler Rsync is written in [TOML](https://github.com/t
 ```toml
 [firsthost]
     hostname = "first"
-    remote_folder = "/something/"
+    target_folder = "/something/"
     rsync_options = ["--delete", "-v"]
 
 [secondhost]
     hostname = "127.0.0.1"
-    remote_folder = "/something/"
+    target_folder = "/something/"
     default = true
 ```
 
 The available keys are:
 
 * **`hostname`**: A hostname to be understood by `rsync`. Hint: Use aliases in your `~/.ssh/config/`!
-* **`remote_folder`**: The target directory to be syncing to.
+* **`target_folder`**: The target directory to be syncing to (remote or local).
 * **`rsync_options`**: A array of strings of `rsync` options. They are used in addition to the default, basic options hardcoded into the Python program and the options supplied by the command line call.
 * **`default`**: A boolean (either `true` or `false` or not given) whether or not the current entry is the default. You yourself are responsible for preventing multiple defaults.
-* **`local_folder`**: Usually, Simpler Rsync is expected to work from the current directory of invocation. Setting this value changes this behavior explicitly. Useful in combination with `gather`, see next section.
+* **`source_folder`**: Usually, Simpler Rsync is expected to work from the current directory of invocation. Setting this value changes this behavior explicitly. Useful in combination with `gather`, see next section.
 
-**Note**: Soon™, `remote_folder` and `local_folder` will be renamed to `target_folder` and `source_folder`, respectively, to better the reflect the recent changes in the script.
+**Note**: `remote_folder` and `local_folder` are deprecated and will be removed soon™! There's a handy little command in the warning to convert config files.
 
 Additionally to the parameters of an entry, *global* parameters true for all entries in the config file can be specified. The parameters need to be specified before the first entry occurs. Currently, only `rsync_options` is supported. Example:
 
@@ -94,8 +94,8 @@ Simpler Rsync also supports transfers from a remote host to the local machine (a
 ```toml
 [inversehost]
     hostname = "second"
-    local_folder = "/some/thing/"
-    remote_folder = "/some/thang/"
+    source_folder = "/some/thing/"
+    target_folder = "/some/thang/"
     gather = true
     rsync_options = ["--update"]
 ```
@@ -103,11 +103,11 @@ Simpler Rsync also supports transfers from a remote host to the local machine (a
 The `gather` option is the important one. It switches the order of source and destination in the underlying `rsync` call.
 
 ### Local Transfers
-For copying on the same machine, Simpler Rsync supports *host-less* operations between a source directory and a target directory. This mode is enabled if the `hostname` key of the respective entry in the config file is missing. In this case, the script also checks for `remote_folder` to be a valid directory on the current machine (despite the name). Example config file:
+For copying on the same machine, Simpler Rsync supports *host-less* operations between a source directory and a target directory. This mode is enabled if the `hostname` key of the respective entry in the config file is missing. In this case, the script also checks for `target_folder` to be a valid directory on the current machine. Example config file:
 
 ```toml
 [localstuff]
-    remote_folder = "/dev/null/"
+    target_folder = "/dev/null/"
 ```
 
 ## Dependencies
