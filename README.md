@@ -2,6 +2,8 @@
 
 I'm unable to remember the `rsync` options I usually need for transferring files to a remote location. Also, I'm too lazy to memorize the remote path. So I made a wrapper around `rsync` which reads from a config file in the current directory.
 
+Simpler Rsync works well together with [`fswatch`](https://github.com/emcrisostomo/fswatch) to automatically sync changes in the current folder. See below.
+
 ## Getting Started
 
 You can install Simpler Rsync either with `pip install` or manually. The former works great for me, but is not well tested beyond my OS X setups.
@@ -115,4 +117,14 @@ Some Python packages are required for Simpler Rsync. All can be installed with `
 
 ```bash
 pip install sh toml click
+```
+
+## Monitoring Changes with `fswatch`
+
+[`fswatch`](https://github.com/emcrisostomo/fswatch) offers a platform-independent way of monitoring a directory (/file) for changes. A change triggers an event, which can surely be Simpler Rsync! This creates instant sync-on-save. Pretty cool.
+
+A sample call which will monitor the current directory (excluding `.git/`) and invoke Simpler Rsync on every change:
+
+```
+fswatch -o . -e .git/ | xargs -n1 -I{} sync.py
 ```
