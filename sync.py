@@ -4,6 +4,7 @@
 import os
 from datetime import datetime
 import time
+import fnmatch
 import click
 import toml
 from sh import rsync
@@ -64,8 +65,11 @@ if thereIsWatchDog:
 		def on_any_event(self, event):
 			super(syncEventHandler, self).on_any_event(event)
 
-			print("Event!")
-			if self.action is not None:
+			# print("Event!")
+			eligableForSync = False
+			if not os.path.isdir(event.src_path) and ".git" not in event.src_path and not fnmatch.fnmatch(event.src_path, ".*.tmp"):
+				eligableForSync = True
+			if self.action is not None and eligableForSync:
 				self.action()
 
 @click.command()
