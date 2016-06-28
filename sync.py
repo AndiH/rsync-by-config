@@ -1,11 +1,20 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # sync.py by Andreas Herten, Feb+ 2016
 
 import os
 from datetime import datetime
+import time
 import click
 import toml
 from sh import rsync
+
+try:
+	from watchdog.observers import Observer
+	from watchdog.events import FileSystemEventHandler
+	thereIsWatchDog = True
+except ImportError:
+	thereIsWatchDog = False
+	print("# Watchdog package not found; monitoring capabilities not available.")
 
 def sync(host_toml, localDir, destDir, rsync_options, dryrun, gather, config_file, verbose):
 	rsync_opts = []
@@ -47,14 +56,26 @@ def loadConfig(filename):
 	with open(filename) as f:
 		return toml.loads(f.read())
 
+if thereIsWatchDog:
+	class syncEventHandler(FileSystemEventHandler):
+		def __init__(self, action = None):
+			super(syncEventHandler, self).__init__()
+			self.action = action
+		def on_any_event(self, event):
+			super(syncEventHandler, self).on_any_event(event)
+
+			print("Event!")
+			if self.action is not None:
+				self.action()
 
 @click.command()
+@click.option("--monitor", "-m", is_flag=True, default=False, help="Run in monitor mode.")
 @click.option("--config_file", default=".sync.toml", help="Name of configuration file. The default is '.sync.toml'.")
 @click.option("--rsync_options", "-o", default="", type=str, multiple=True, help="Additional options to call rsync with.")
 @click.option("--dryrun", is_flag=True, help="Call rsync as a dry run.")
 @click.option("--verbose", is_flag=True, help="Run with output information.")
 @click.argument('entry', default="")
-def main(entry, config_file, rsync_options, dryrun, verbose):
+def main(entry, monitor, config_file, rsync_options, dryrun, verbose):
 	"""Use the entry of ENTRY in config_file to synchronize the files of the current directory to. If ENTRY is not specified, the entry of config_file with 'default = true' is taken. If no default entry is specified, some entry is taken (which might be the first in the config file, but does not need to be).
 
 
@@ -74,6 +95,13 @@ def main(entry, config_file, rsync_options, dryrun, verbose):
 
 	if verbose:
 		print('# Running {} in verbose mode. All verbosity commands are prefixed with #. Current datetime: {}'.format(os.path.basename(__file__), datetime.now()))
+
+	# Check if monitoring is enabled; checking is also done on import
+	if monitor:
+		if not thereIsWatchDog:
+			print("Sorry, package Watchdog not found. Monitoring not possible.")
+		if verbose and thereIsWatchDog:
+			print('# Running in monitor mode.')
 
 	configFilename = config_file
 	currentDir = os.getcwd()
@@ -160,7 +188,23 @@ def main(entry, config_file, rsync_options, dryrun, verbose):
 		if verbose:
 			print("# --gather is turned ON! Collecting to {}".format(localDir))
 		gather = True
-	sync(entry_toml, localDir, destDir, rsync_options, dryrun, gather, config_file, verbose)
+	## Set up monitoring
+	syncer = lambda: sync(entry_toml, localDir, destDir, rsync_options, dryrun, gather, config_file, verbose)
+	if monitor and thereIsWatchDog and not gather:
+		event_handler = syncEventHandler(action = syncer)
+		observer = Observer()
+		print(localDir)
+		observer.schedule(event_handler, localDir, recursive=True)
+		observer.start()
+		try:
+			while True:
+				time.sleep(1)
+		except KeyboardInterrupt:
+			print("Stopping...")
+			observer.stop()
+		observer.join()
+	else:
+		syncer()
 
 if __name__ == '__main__':
 	main(auto_envvar_prefix='SRSYNC')

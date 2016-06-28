@@ -9,7 +9,8 @@ setup(
 	install_requires=[
 		'Click',
 		'sh',
-		'toml'
+		'toml',
+		'watchdog'
 	],
 	# entry_points={
 	# 	'console_scripts': ['mysync=sync:main']
