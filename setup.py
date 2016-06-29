@@ -1,10 +1,10 @@
 from setuptools import setup
 
 setup(
-	name='simpler-rsync',
-	version='1.7',
+	name='rsync-by-config',
+	version='2.0',
 	author='Andreas Herten',
-	url='https://github.com/AndiH/simpler-rsync',
+	url='https://github.com/AndiH/rsync-by-config',
 	# py_modules=['simpler-rsync'],
 	install_requires=[
 		'Click',
@@ -14,5 +14,5 @@ setup(
 	# entry_points={
 	# 	'console_scripts': ['mysync=sync:main']
 	# }
-	scripts=['sync.py']
+	scripts=['rbc.py']
 )
