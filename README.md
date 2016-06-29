@@ -31,7 +31,7 @@ pip install .
 ```bash
 cd ~/bin/
 git clone https://github.com/AndiH/rsync-by-config
-ln -s rsync-by-config/sync.py
+ln -s rsync-by-config/rbc.py
 rbc.py --help
 ```
 
