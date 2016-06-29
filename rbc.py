@@ -100,7 +100,7 @@ def main(entry, monitor, config_file, rsync_options, dryrun, verbose):
 		* source_folder: Explicitly set the source directory to this value\n
 		* gather: If true, switches the order of source and destination.
 
-	For a full list of options see https://github.com/AndiH/simpler-rsync"""
+	For a full list of options see https://github.com/AndiH/rsync-by-config"""
 
 	if verbose:
 		print('# Running {} in verbose mode. All verbosity commands are prefixed with #. Current datetime: {}'.format(os.path.basename(__file__), datetime.now()))
@@ -216,4 +216,4 @@ def main(entry, monitor, config_file, rsync_options, dryrun, verbose):
 		syncer()
 
 if __name__ == '__main__':
-	main(auto_envvar_prefix='SRSYNC')
+	main(auto_envvar_prefix='RBC')
