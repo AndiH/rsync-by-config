@@ -43,6 +43,7 @@ You should insert `~/bin/` into your `$PATH`, e.g. via `export PATH=$HOME/bin/:$
 The Python script has a few command line options, all documented via `rbc.py --help`:
 
 * **`ENTRY`**: The name of the entry in the config file to be used for synchronization. If not specified, the *default* entry is taken. If there's no default, the first entry is taken. Maybe, at least, since the read-in of the config file is not strongly controlled…
+* **`--monitor`**: Run Rsync By Config in monitoring (or *deamon*) mode. This will monitor the source folder for changes and issue a synchronization if one occurs. The package [Watchdog](https://github.com/gorakhargosh/watchdog) is used for this. (A more manual alternative to Watchdog is the command line utility [`fswatch`](https://github.com/emcrisostomo/fswatch), which can invoke arbitrary programs when a folder is changed.)
 * **`--config_file=somefile`**: Specify a different config file. The default is `.sync.toml`.
 * **`--dryrun`**: Calls `rsync` with `--dryrun`, preventing all actual copies. Good for testing.
 * **`--verbose`**: Output every step and test of the script.
@@ -112,19 +113,12 @@ For copying on the same machine, Rsync By Config supports *host-less* operations
     target_folder = "/dev/null/"
 ```
 
+
 ## Dependencies
 Some Python packages are required for Rsync By Config. All can be installed with `pip`:
 
 ```bash
-pip install sh toml click
+pip install sh toml click watchdog
 ```
 
-## Monitoring Changes with `fswatch`
-
-[`fswatch`](https://github.com/emcrisostomo/fswatch) offers a platform-independent way of monitoring a directory (/file) for changes. A change triggers an event, which can surely be Rsync By Config! This creates instant sync-on-save. Pretty cool.
-
-A sample call which will monitor the current directory (excluding `.git/`) and invoke Rsync By Config on every change:
-
-```
-fswatch -o . -e .git/ | xargs -n1 -I{} rbc.py
-```
+While non-essential for its core task, Watchdog is needed for the monitoring capabilities. The dependency is optional, though.
