@@ -62,6 +62,9 @@ if thereIsWatchDog:
 		def __init__(self, action = None):
 			super(syncEventHandler, self).__init__()
 			self.action = action
+			self.counter = 0
+		def getCounter(self):
+			return self.counter
 		def on_any_event(self, event):
 			super(syncEventHandler, self).on_any_event(event)
 
@@ -70,6 +73,8 @@ if thereIsWatchDog:
 			if not os.path.isdir(event.src_path) and ".git" not in event.src_path and not fnmatch.fnmatch(event.src_path, ".*.tmp"):
 				eligableForSync = True
 			if self.action is not None and eligableForSync:
+				self.counter += 1
+				print("~~ Sync {} at {}".format(self.counter, datetime.now()))
 				self.action()
 
 @click.command()
@@ -197,14 +202,14 @@ def main(entry, monitor, config_file, rsync_options, dryrun, verbose):
 	if monitor and thereIsWatchDog and not gather:
 		event_handler = syncEventHandler(action = syncer)
 		observer = Observer()
-		print(localDir)
 		observer.schedule(event_handler, localDir, recursive=True)
 		observer.start()
 		try:
 			while True:
 				time.sleep(1)
 		except KeyboardInterrupt:
-			print("Stopping...")
+			print("~~ Stopping...")
+			print("~~ Synced in total {} times".format(event_handler.getCounter()))
 			observer.stop()
 		observer.join()
 	else:
