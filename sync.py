@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # sync.py by Andreas Herten, Feb+ 2016
 
 import os
