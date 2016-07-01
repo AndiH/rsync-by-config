@@ -2,14 +2,15 @@ from setuptools import setup
 
 setup(
 	name='rsync-by-config',
-	version='2.0',
+	version='2.1',
 	author='Andreas Herten',
 	url='https://github.com/AndiH/rsync-by-config',
 	# py_modules=['simpler-rsync'],
 	install_requires=[
 		'Click',
 		'sh',
-		'toml'
+		'toml',
+		'watchdog'
 	],
 	# entry_points={
 	# 	'console_scripts': ['mysync=sync:main']
