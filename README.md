@@ -6,7 +6,7 @@ Rsync By Config was previously called *Simpler Rsync*.
 
 ## Getting Started
 
-You can install Rsync By Config either with `pip install` or manually. The former works great for me, but is not well tested beyond my OS X setups.
+You can install Rsync By Config either with `pip install` or manually. Using `pip` is the recommended way (but it is not really tested beyond my OS X setups).
 
 ### With `pip`
 This all-important one-liner should take care of pretty much everything:
@@ -15,15 +15,22 @@ This all-important one-liner should take care of pretty much everything:
 pip install https://github.com/AndiH/rsync-by-config/archive/master.zip
 ```
 
-You should have a command `rbc.py` now available in your shell. In the process, all dependencies should be installed as well. (This is the first time I tried setuptools, so let me know if something is not working).
+You should have a command `rbc` now available in your shell. In the process, all dependencies should be installed as well.
 
-More manually, you could clone into some temporary directory and call `pip` into that directory:
+Test it with
+
+```bash
+rbc --help
+```
+
+More manually but having the same effect, you could clone into some temporary directory and call `pip` into that directory:
 
 ```bash
 cd $TMPDIR
 git clone https://github.com/AndiH/rsync-by-config
 cd rsync-by-config
 pip install .
+rbc --help
 ```
 
 ### Without `pip`
@@ -35,12 +42,12 @@ ln -s rsync-by-config/rbc.py
 rbc.py --help
 ```
 
-You should insert `~/bin/` into your `$PATH`, e.g. via `export PATH=$HOME/bin/:$PATH` so you can use `rbc.py` globally from any folder. If `rbc.py` does not run, make sure to have installed all [dependencies](#dependencies).
+You should insert `~/bin/` into your `$PATH`, e.g. via `export PATH=$HOME/bin/:$PATH` so you can use `rbc.py` globally from any folder. If `rbc.py` does not run, make sure to have installed all [dependencies](#dependencies). *Note: For the time being, a message about this being not the ideal way to invoke rbc is printed. This will go away at some point.*
 
 ## Options
-`rbc.py` reads from a configuration file in the current directory. Depending on the parameters specified there, the content of a directory (e.g. the current one) is copied to a target location using `rsync`.
+`rbc` reads from a configuration file in the current directory, i.e. `.sync.toml`. Depending on the parameters specified there, the content of a directory (e.g. the current one) is copied to a target location using `rsync`.
 
-The Python script has a few command line options, all documented via `rbc.py --help`:
+The Python script has a few command line options, all documented via `rbc --help`:
 
 * **`ENTRY`**: The name of the entry in the config file to be used for synchronization. If not specified, the *default* entry is taken. If there's no default, the first entry is taken. Maybe, at least, since the read-in of the config file is not strongly controlled…
 * **`--monitor`**: Run Rsync By Config in monitoring (or *deamon*) mode. This will monitor the source folder for changes and issue a synchronization if one occurs. The package [Watchdog](https://github.com/gorakhargosh/watchdog) is used for this. (A more manual alternative to Watchdog is the command line utility [`fswatch`](https://github.com/emcrisostomo/fswatch), which can invoke arbitrary programs when a folder is changed.)
@@ -53,7 +60,7 @@ To specify values for the options globally, environment values can be set. This 
 
 ```bash
 export RBC_CONFIG_FILE=.my.toml
-rbc.py somehost
+rbc somehost
 ```
 
 ## Config File
@@ -122,3 +129,5 @@ pip install sh toml click watchdog
 ```
 
 While non-essential for its core task, Watchdog is needed for the monitoring capabilities. The dependency is optional, though.
+
+When chosen the recommended way of installing Rsync By Config itself via `pip`, all dependencies are installed in the process.
