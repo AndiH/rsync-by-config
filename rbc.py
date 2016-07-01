@@ -216,4 +216,8 @@ def main(entry, monitor, config_file, rsync_options, dryrun, verbose):
 		syncer()
 
 if __name__ == '__main__':
+	print("It looks like you called Rsync By Config directly via rbc.py!\nConsider using pip to install rbc as a package (including command line tool `rbc`!)\n\tpip install https://github.com/AndiH/rsync-by-config/archive/master.zip.\n\n")
+	main(auto_envvar_prefix='RBC')
+
+def setupToolsWrap():
 	main(auto_envvar_prefix='RBC')
