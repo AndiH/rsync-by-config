@@ -209,7 +209,7 @@ def main(entry, monitor, config_file, rsync_options, dryrun, verbose):
 				time.sleep(1)
 		except KeyboardInterrupt:
 			print("~~ Stopping...")
-			print("~~ Synced in total {} times".format(event_handler.getCounter()))
+			print("~~ Synced {} times in total".format(event_handler.getCounter()))
 			observer.stop()
 		observer.join()
 	else:
