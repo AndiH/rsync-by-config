@@ -54,7 +54,7 @@ The Python script has a few command line options, all documented via `rbc --help
 * **`--confg_file=somefile`**: Specify a different config file. The default is `.sync.toml`.
 * **`--dryrun`**: Calls `rsync` with `--dryrun`, preventing all actual copies. Good for testing.
 * **`--verbose`**: Output every step and test of the script.
-* **`--listhosts`**: Lists the hosts specified in the config file. Exits afterwards.
+* **`--listhosts`**: Lists the hosts specified in the config file. Exits afterwards. Adding `--verbose` will list all options of the hosts specified in the config file.
 * **`--rsync_options="--something"`**: Propagate `--something` to `rsync` as an additional option. Can be invoked multiple times. Shorthand: `-o`. The `rsync` option is given in addition to the basic, default options hardcoded into the script file and in addition to the options defined in the config file.
 
 To specify values for the options globally, environment values can be set. This is handy if you don't like my choice of calling the default config file `.sync.toml` (see below) and want to change it. The command line options (at least the last three from the list above) are accessible as environment variables with a `RBC_` prefix, thanks to [Click](http://click.pocoo.org/). So, for example, to rename the default config file, do:

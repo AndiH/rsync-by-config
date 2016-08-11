@@ -78,12 +78,18 @@ if thereIsWatchDog:
 				self.action()
 
 
-def listHosts(config_file):
+def listHosts(config_file, verbose=False):
 	config = loadConfig(config_file)  # repeating this here to make it externally available
 	print("Specified entries in {} are:".format(config_file))
 	for en in config:
-		if isinstance(config[en], dict):
+		currentEntry = config[en]
+		if isinstance(currentEntry, dict):
 			print("\t {}".format(en))
+			if (verbose):
+				for (key, entry) in currentEntry.items():
+					print("\t\t {}: {}".format(key, entry))
+				print("\n")
+
 
 @click.command()
 @click.option("--monitor", "-m", is_flag=True, default=False, help="Run in monitor mode.")
@@ -134,7 +140,9 @@ def main(entry, monitor, config_file, rsync_options, dryrun, verbose, listhosts)
 		print("# Loaded config file {}".format(configFile))
 	# List hosts, if user flags it
 	if listhosts:
-		listHosts(configFile)
+		if (verbose):
+			print("# Listing available host files")
+		listHosts(configFile, verbose)
 		exit()
 	# Globals
 	if "rsync_options" in config:
