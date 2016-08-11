@@ -51,9 +51,10 @@ The Python script has a few command line options, all documented via `rbc --help
 
 * **`ENTRY`**: The name of the entry in the config file to be used for synchronization. If not specified, the *default* entry is taken. If there's no default, the first entry is taken. Maybe, at least, since the read-in of the config file is not strongly controlled…
 * **`--monitor`**: Run Rsync By Config in monitoring (or *deamon*) mode. This will monitor the source folder for changes and issue a synchronization if one occurs. The package [Watchdog](https://github.com/gorakhargosh/watchdog) is used for this. (A more manual alternative to Watchdog is the command line utility [`fswatch`](https://github.com/emcrisostomo/fswatch), which can invoke arbitrary programs when a folder is changed.)
-* **`--config_file=somefile`**: Specify a different config file. The default is `.sync.toml`.
+* **`--confg_file=somefile`**: Specify a different config file. The default is `.sync.toml`.
 * **`--dryrun`**: Calls `rsync` with `--dryrun`, preventing all actual copies. Good for testing.
 * **`--verbose`**: Output every step and test of the script.
+* **`--listhosts`**: Lists the hosts specified in the config file. Exits afterwards.
 * **`--rsync_options="--something"`**: Propagate `--something` to `rsync` as an additional option. Can be invoked multiple times. Shorthand: `-o`. The `rsync` option is given in addition to the basic, default options hardcoded into the script file and in addition to the options defined in the config file.
 
 To specify values for the options globally, environment values can be set. This is handy if you don't like my choice of calling the default config file `.sync.toml` (see below) and want to change it. The command line options (at least the last three from the list above) are accessible as environment variables with a `RBC_` prefix, thanks to [Click](http://click.pocoo.org/). So, for example, to rename the default config file, do:
