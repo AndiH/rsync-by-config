@@ -77,14 +77,23 @@ if thereIsWatchDog:
 				print("~~ Sync {} at {}".format(self.counter, datetime.now()))
 				self.action()
 
+
+def listHosts(config_file):
+	config = loadConfig(config_file)  # repeating this here to make it externally available
+	print("Specified entries in {} are:".format(config_file))
+	for en in config:
+		if isinstance(config[en], dict):
+			print("\t {}".format(en))
+
 @click.command()
 @click.option("--monitor", "-m", is_flag=True, default=False, help="Run in monitor mode.")
 @click.option("--config_file", default=".sync.toml", help="Name of configuration file. The default is '.sync.toml'.")
 @click.option("--rsync_options", "-o", default="", type=str, multiple=True, help="Additional options to call rsync with.")
 @click.option("--dryrun", is_flag=True, help="Call rsync as a dry run.")
 @click.option("--verbose", is_flag=True, help="Run with output information.")
+@click.option("--listhosts", is_flag=True, help="List available hosts in config_file.")
 @click.argument('entry', default="")
-def main(entry, monitor, config_file, rsync_options, dryrun, verbose):
+def main(entry, monitor, config_file, rsync_options, dryrun, verbose, listhosts):
 	"""Use the entry of ENTRY in config_file to synchronize the files of the current directory to. If ENTRY is not specified, the entry of config_file with 'default = true' is taken. If no default entry is specified, some entry is taken (which might be the first in the config file, but does not need to be).
 
 
@@ -123,6 +132,10 @@ def main(entry, monitor, config_file, rsync_options, dryrun, verbose):
 	rsync_options = list(rsync_options)
 	if verbose:
 		print("# Loaded config file {}".format(configFile))
+	# List hosts, if user flags it
+	if listhosts:
+		listHosts(configFile)
+		exit()
 	# Globals
 	if "rsync_options" in config:
 		if verbose:
@@ -145,9 +158,7 @@ def main(entry, monitor, config_file, rsync_options, dryrun, verbose):
 	else:
 		if entry not in config:
 			print("No entry {} is known in {}. Please edit the file!".format(entry, configFilename))
-			print("Specified entries are:")
-			for en in config:
-				print("\t {}".format(en))
+			listHosts(configFile)
 			exit()
 	if verbose:
 		print("# Using entry {}".format(entry))
@@ -216,7 +227,7 @@ def main(entry, monitor, config_file, rsync_options, dryrun, verbose):
 		syncer()
 
 if __name__ == '__main__':
-	print("It looks like you called Rsync By Config directly via rbc.py!\nConsider using pip to install rbc as a package (including command line tool `rbc`!)\n\tpip install https://github.com/AndiH/rsync-by-config/archive/master.zip.\n\n")
+	print("It looks like you called Rsync By Config via rbc.py!\n Consider using pip to install rbc as a package (with a command line tool): pip install https://github.com/AndiH/rsync-by-config/archive/master.zip.")
 	main(auto_envvar_prefix='RBC')
 
 def setupToolsWrap():
