@@ -17,7 +17,28 @@ except ImportError:
 	thereIsWatchDog = False
 	print("# Watchdog package not found; monitoring capabilities not available.")
 
-def sync(host_toml, localDir, destDir, rsync_options, dryrun, gather, config_file, verbose):
+class syncObject(object):
+	"""docstring for syncObject."""
+	def __init__(self, host_toml, localDir, destDir, rsync_options, dryrun, gather, config_file, verbose):
+		self.host_toml = host_toml
+		self.localDir = localDir
+		self.destDir = destDir
+		self.rsync_options = rsync_options
+		self.dryrun = dryrun
+		self.gather = gather
+		self.config_file = config_file
+		self.verbose = verbose
+
+class rbcObj(object):
+	"""Holds all state information of the syncing process."""
+	def __init__(self, verbose, configFilename):
+		self.verbose = verbose
+		self.configFilename = configFilename
+		self.currentDir = os.getcwd()
+		self.configFilenameAbs = os.path.join(currentDir, configFilename)
+
+
+def sync(synObj):
 	rsync_opts = []
 	rsync_opts.append("--archive")  # archive
 	# rsync_opts.append("--update")  # skip files that are newer on the receiver
@@ -29,33 +50,36 @@ def sync(host_toml, localDir, destDir, rsync_options, dryrun, gather, config_fil
 	# rsync_opts.append("--delete")  # delete extraneous files from dest dirs
 	# rsync_opts.append('--filter=\"dir-merge,- .gitignore\"')
 	rsync_opts.append('--exclude=*.bin')
-	rsync_opts.append('--exclude=' + config_file)
-	if dryrun:
-		if verbose:
+	rsync_opts.append('--exclude=' + synObj.config_file)
+	if synObj.dryrun:
+		if synObj.verbose:
 			print("# --dryrun is turned ON!")
 		rsync_opts.append("--dry-run")  # no transfer, just report
-	if 'rsync_options' in host_toml:
-		for option in host_toml['rsync_options']:
+	if 'rsync_options' in synObj.host_toml:
+		for option in synObj.host_toml['rsync_options']:
 			rsync_opts.append(option)
-	for option in rsync_options:
+	for option in synObj.rsync_options:
 		rsync_opts.append(str(option))
 
-	if verbose:
+	if synObj.verbose:
 		print("# All rsync options: {}".format(rsync_opts))
 
-	sourceDir = localDir + "/"  # make sure it has a trailing slash, for rsync
-	if 'hostname' in host_toml:
-		destDir = str(host_toml['hostname']) + ":" + destDir
+	synObj.sourceDir = synObj.localDir + "/"  # make sure it has a trailing slash, for rsync
+	if 'hostname' in synObj.host_toml:
+		synObj.destDir = str(synObj.host_toml['hostname']) + ":" + synObj.destDir
 
-	if gather:
-		sourceDir, destDir = destDir, sourceDir
+	if synObj.gather:
+		synObj.sourceDir, synObj.destDir = synObj.destDir, synObj.sourceDir
 
-	print(rsync(rsync_opts, sourceDir, destDir))
+	print(rsync(rsync_opts, synObj.sourceDir, synObj.destDir))
 
 
-def loadConfig(filename):
+def loadConfig(verbose, filename):
 	with open(filename) as f:
-		return toml.loads(f.read())
+		config = toml.loads(f.read())
+	if verbose:
+		print("# Loaded config file {}".format(filename))
+	return config
 
 if thereIsWatchDog:
 	class syncEventHandler(FileSystemEventHandler):
@@ -78,9 +102,10 @@ if thereIsWatchDog:
 				self.action()
 
 
-def listHosts(config_file, verbose=False):
-	config = loadConfig(config_file)  # repeating this here to make it externally available
-	print("Specified entries in {} are:".format(config_file))
+def listHosts(verbose, config, configFile):
+	if (verbose):
+		print("# Listing available host files")
+	print("Specified entries in {} are:".format(configFile))
 	for en in config:
 		currentEntry = config[en]
 		if isinstance(currentEntry, dict):
@@ -90,6 +115,117 @@ def listHosts(config_file, verbose=False):
 					print("\t\t {}: {}".format(key, entry))
 				print("\n")
 
+def sanityCheckConfigFile(configFile):
+	if not os.path.isfile(configFile):
+		print("Please make sure {} exists in the current directory!".format(configFilename))
+		exit()
+
+def parseGlobalRsyncOptions(verbose, config):
+	globalOptions = []
+	"""This parses the global Rsync options specified at the very top of a TOML file."""
+	if "rsync_options" in config:
+		if verbose:
+			print("# A global rsync_options key is given in the config file.")
+		rawOptions = config["rsync_options"]
+		if type(rawOptions) is list:
+			for option in config["rsync_options"]:
+				globalOptions.append(str(option))
+		else:
+			globalOptions.append(str(rawOptions))
+		if verbose:
+			print("# List of rsync options due to command line and global key in config file: {}".format(globalOptions))
+	return globalOptions
+
+def parseDefaultEntry(verbose, config):
+	if verbose:
+		print("# No entry was explicitly specified; trying to determine from config file")
+	entry = list(config.keys())[-1]
+	for en in config:
+		if "default" in config[en]:
+			if config[en]["default"] is True:
+				entry = en
+				print("# Found default entry {}".format(en))
+				print("Using entry: {}".format(en))
+	return (entry, False)  # Multi host default entry not yet supported
+
+def sanityCheckEntries(verbose, entries, config, configFile):
+	for entry in entries:
+		if entry not in config:
+			print("No entry {} is known in {}. Please edit the file!".format(entry, os.path.basename(configFile)))
+			listHosts(verbose, config, configFile)
+			exit()
+
+def parseMultiEntries(verbose, entry, config, configFile):
+	multihost = False
+	entries = entry.split(",")
+	if len(entries) > 1:
+		multihost = True
+	sanityCheckEntries(verbose, entries, config, configFile)
+	if verbose:
+		if multihost:
+			print("Using entries " + ", ".join(entries) + ".")
+		else:
+			print("# Using entry {}".format(entries))
+	return (entries, multihost)
+
+def parseEntry(verbose, config, configFile, entry):
+	if entry == "":
+		(entry, multihost) = parseDefaultEntry(verbose, config)
+	else:
+		(entry, multihost) = parseMultiEntries(verbose, entry, config, configFile)
+	return (entry, multihost)
+
+def parseSourceDirectory(verbose, currentDir, configFilename, entry_toml):
+	sourceDir = currentDir
+	if ('local_folder' or 'source_folder') in entry_toml:
+		if 'source_folder' in entry_toml:
+			sourceDirUntested = entry_toml['source_folder']
+		else:
+			print("Warning: Key `local_folder` is deprecated. Please use `source_folder`!\nThe following command will in-place modify the file:\n\tsed -i -- 's/local_folder/source_folder/g' {}".format(configFilename))
+			sourceDirUntested = entry_toml['local_folder']
+		if not (os.path.isdir(sourceDirUntested) and os.path.exists(sourceDirUntested)):
+			print("You specified the source folder {} to be synced. This folder does not exist!".format(sourceDirUntested))
+			exit()
+		sourceDir = sourceDirUntested
+		if verbose:
+			print("# Running with explicit source folder {}".format(sourceDir))
+	if verbose:
+		print("# Using source folder {}".format(sourceDir))
+	return sourceDir
+
+def parseTargetDirectory(verbose, entry, configFilename, entry_toml):
+	if (not "remote_folder" or not "target_folder") in entry_toml:
+		print("The entry {} does not have a target folder location. Please edit {}!".format(entry, configFilename))
+		exit()
+	if "remote_folder" in entry_toml:
+		print("Warning: Key `remote_folder` is deprecated. Please use `target_folder`!\nThe following command will in-place modify the file:\n\tsed -i -- 's/remote_folder/target_folder/g' {}".format(configFilename))
+		destDir = entry_toml['remote_folder']
+	if "target_folder" in entry_toml:
+		destDir = entry_toml['target_folder']
+	if verbose:
+		print("# The target folder path is {}".format(destDir))
+	return destDir
+
+def sanityCheckTarget(verbose, destDir, entry_toml):
+	if "hostname" not in entry_toml:
+		if verbose:
+			print("# No hostname specified. Targeting local transfers.")
+		if not (os.path.isdir(destDir) and os.path.exists(destDir)):
+			print("You specified the target folder {}. This folder does not exist!".format(destDir))
+			exit()
+		if verbose:
+			print("# Running with local target folder {}".format(destDir))
+	if "hostname" in entry_toml:
+		if verbose:
+			print("# The remote hostname is {}".format(entry_toml['hostname']))
+
+def checkIfGather(verbose, localDir, entry_toml):
+	gather = False
+	if 'gather' in entry_toml:
+		if verbose:
+			print("# --gather is turned ON! Collecting to {}".format(localDir))
+		gather = True
+	return gather
 
 @click.command()
 @click.option("--monitor", "-m", is_flag=True, default=False, help="Run in monitor mode.")
@@ -118,7 +254,7 @@ def main(entry, monitor, config_file, rsync_options, dryrun, verbose, listhosts)
 	For a full list of options see https://github.com/AndiH/rsync-by-config"""
 
 	if verbose:
-		print('# Running {} in verbose mode. All verbosity commands are prefixed with #. Current datetime: {}'.format(os.path.basename(__file__), datetime.now()))
+		print("# Running {} in verbose mode. All verbosity commands are prefixed with #. Current datetime: {}".format(os.path.basename(__file__), datetime.now()))
 
 	# Check if monitoring is enabled; checking is also done on import
 	if monitor:
@@ -130,94 +266,57 @@ def main(entry, monitor, config_file, rsync_options, dryrun, verbose, listhosts)
 	configFilename = config_file
 	currentDir = os.getcwd()
 	configFile = os.path.join(currentDir, configFilename)
-	if not os.path.isfile(configFile):
-		print("Please make sure {} exists in the current directory!".format(configFilename))
-		exit()
+
+	rbcSyncer = rbcObj(verbose, configFilename)
+
+
 	## Configuration file parsing
-	config = loadConfig(configFile)
+	sanityCheckConfigFile(configFile)
+	config = loadConfig(verbose, configFile)
+
+	# Check for command line rsync parameters
 	rsync_options = list(rsync_options)
-	if verbose:
-		print("# Loaded config file {}".format(configFile))
+
 	# List hosts, if user flags it
 	if listhosts:
-		if (verbose):
-			print("# Listing available host files")
-		listHosts(configFile, verbose)
+		listHosts(verbose, config, configFile)
 		exit()
+
 	# Globals
-	if "rsync_options" in config:
-		if verbose:
-			print("# A global rsync_options key is given in the config file.")
-		for option in config["rsync_options"]:
-			rsync_options.append(str(option))
-		if verbose:
-			print("# List of rsync options due to command line and global key in config file: {}".format(rsync_options))
+	rsync_options = rsync_options + parseGlobalRsyncOptions(verbose, config)
+
 	# Try to determine which entry to take from the config file
-	if entry == "":
-		if verbose:
-			print("# No entry was explicitly specified; trying to determine from config file")
-		entry = list(config.keys())[-1]
-		for en in config:
-			if "default" in config[en]:
-				if config[en]["default"] is True:
-					entry = en
-					print("# Found default entry {}".format(en))
-					print("Using entry: {}".format(en))
-	else:
-		if entry not in config:
-			print("No entry {} is known in {}. Please edit the file!".format(entry, configFilename))
-			listHosts(configFile)
-			exit()
-	if verbose:
-		print("# Using entry {}".format(entry))
-	entry_toml = config[entry]
-	## Source directory parsing
-	localDir = currentDir
-	if ('local_folder' or 'source_folder') in entry_toml:
-		if 'source_folder' in entry_toml:
-			localDirUntested = entry_toml['source_folder']
-		else:
-			print("Warning: Key `local_folder` is deprecated. Please use `source_folder`!\nThe following command will in-place modify the file:\n\tsed -i -- 's/local_folder/source_folder/g' {}".format(configFilename))
-			localDirUntested = entry_toml['local_folder']
-		if not (os.path.isdir(localDirUntested) and os.path.exists(localDirUntested)):
-			print("You specified the source folder {} to be synced. This folder does not exist!".format(localDirUntested))
-			exit()
-		localDir = localDirUntested
-		if verbose:
-			print("# Running with explicit source folder {}".format(localDir))
-	if verbose:
-		print("# Using source folder {}".format(localDir))
-	## Target directory parsing
-	if (not "remote_folder" or not "target_folder") in entry_toml:
-		print("The entry {} does not have a target folder location. Please edit {}!".format(entry, configFilename))
+	(entry, multihost) = parseEntry(verbose, config, configFile, entry)
+
+	if multihost:
+		# HANDLE MULTIHOST
+		print("Multihost only supported up to this stage of the program.")
 		exit()
-	if "remote_folder" in entry_toml:
-		print("Warning: Key `remote_folder` is deprecated. Please use `target_folder`!\nThe following command will in-place modify the file:\n\tsed -i -- 's/remote_folder/target_folder/g' {}".format(configFilename))
-		destDir = entry_toml['remote_folder']
-	if "target_folder" in entry_toml:
-		destDir = entry_toml['target_folder']
-	if verbose:
-		print("# The target folder path is {}".format(destDir))
+	else:
+		# DEFAULT CASE FOR NOW
+		print("No multihost")
+	entry_toml = config[entry[0]]
+
+	## Source directory parsing
+	localDir = parseSourceDirectory(verbose, currentDir, configFilename, entry_toml)
+
+	## Target directory parsing
+	destDir = parseTargetDirectory(verbose, currentDir, configFilename, entry_toml)
+
 	### Target = remote OR target = local?
-	if "hostname" not in entry_toml:
-		if verbose:
-			print("# No hostname specified. Targeting local transfers.")
-		if not (os.path.isdir(destDir) and os.path.exists(destDir)):
-			print("You specified the target folder {}. This folder does not exist!".format(destDir))
-			exit()
-		if verbose:
-			print("# Running with local target folder {}".format(destDir))
-	if "hostname" in entry_toml:
-		if verbose:
-			print("# The remote hostname is {}".format(entry_toml['hostname']))
+	sanityCheckTarget(verbose, destDir, entry_toml)
+
 	## Invert source and target?
-	gather = False
-	if 'gather' in entry_toml:
-		if verbose:
-			print("# --gather is turned ON! Collecting to {}".format(localDir))
-		gather = True
+	gather = checkIfGather(verbose, localDir, entry_toml)
+
+	## Put into syncObject
+	remote = syncObject(entry_toml, localDir, destDir, rsync_options, dryrun, gather, config_file, verbose)
+
 	## Set up monitoring
-	syncer = lambda: sync(entry_toml, localDir, destDir, rsync_options, dryrun, gather, config_file, verbose)
+	syncer = lambda: sync(remote)
+
+	# syncer = lambda: map(sync, entry_toml, localDir, destDir, rsync_options, dryrun, gather, config_file, verbose)
+	# syncer = lambda: [a(en) for en in strings][0]
 	if monitor and thereIsWatchDog and not gather:
 		event_handler = syncEventHandler(action = syncer)
 		observer = Observer()
