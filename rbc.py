@@ -17,8 +17,9 @@ except ImportError:
 	thereIsWatchDog = False
 	print("# Watchdog package not found; monitoring capabilities not available.")
 
+
 class syncObject(object):
-	"""docstring for syncObject."""
+	"""One sync target and its configuration. More or less equal to one config file entry, parsed."""
 	def __init__(self, host_toml, localDir, destDir, rsync_options, dryrun, gather, config_file, verbose):
 		self.host_toml = host_toml
 		self.localDir = localDir
@@ -81,9 +82,10 @@ def loadConfig(verbose, filename):
 		print("# Loaded config file {}".format(filename))
 	return config
 
+
 if thereIsWatchDog:
 	class syncEventHandler(FileSystemEventHandler):
-		def __init__(self, action = None):
+		def __init__(self, action=None):
 			super(syncEventHandler, self).__init__()
 			self.action = action
 			self.counter = 0
@@ -115,10 +117,12 @@ def listHosts(verbose, config, configFile):
 					print("\t\t {}: {}".format(key, entry))
 				print("\n")
 
+
 def sanityCheckConfigFile(configFile):
 	if not os.path.isfile(configFile):
-		print("Please make sure {} exists in the current directory!".format(configFilename))
+		print("Please make sure {} exists in the current directory!".format(configFile))
 		exit()
+
 
 def parseGlobalRsyncOptions(verbose, config):
 	globalOptions = []
@@ -136,6 +140,7 @@ def parseGlobalRsyncOptions(verbose, config):
 			print("# List of rsync options due to command line and global key in config file: {}".format(globalOptions))
 	return globalOptions
 
+
 def parseDefaultEntry(verbose, config):
 	if verbose:
 		print("# No entry was explicitly specified; trying to determine from config file")
@@ -148,12 +153,14 @@ def parseDefaultEntry(verbose, config):
 				print("Using entry: {}".format(en))
 	return (entry, False)  # Multi host default entry not yet supported
 
+
 def sanityCheckEntries(verbose, entries, config, configFile):
 	for entry in entries:
 		if entry not in config:
 			print("No entry {} is known in {}. Please edit the file!".format(entry, os.path.basename(configFile)))
 			listHosts(verbose, config, configFile)
 			exit()
+
 
 def parseMultiEntries(verbose, entry, config, configFile):
 	multihost = False
@@ -168,12 +175,14 @@ def parseMultiEntries(verbose, entry, config, configFile):
 			print("# Using entry {}".format(entries))
 	return (entries, multihost)
 
+
 def parseEntry(verbose, config, configFile, entry):
 	if entry == "":
 		(entry, multihost) = parseDefaultEntry(verbose, config)
 	else:
 		(entry, multihost) = parseMultiEntries(verbose, entry, config, configFile)
 	return (entry, multihost)
+
 
 def parseSourceDirectory(verbose, currentDir, configFilename, entry_toml):
 	sourceDir = currentDir
@@ -193,6 +202,7 @@ def parseSourceDirectory(verbose, currentDir, configFilename, entry_toml):
 		print("# Using source folder {}".format(sourceDir))
 	return sourceDir
 
+
 def parseTargetDirectory(verbose, entry, configFilename, entry_toml):
 	if (not "remote_folder" or not "target_folder") in entry_toml:
 		print("The entry {} does not have a target folder location. Please edit {}!".format(entry, configFilename))
@@ -205,6 +215,7 @@ def parseTargetDirectory(verbose, entry, configFilename, entry_toml):
 	if verbose:
 		print("# The target folder path is {}".format(destDir))
 	return destDir
+
 
 def sanityCheckTarget(verbose, destDir, entry_toml):
 	if "hostname" not in entry_toml:
@@ -219,6 +230,7 @@ def sanityCheckTarget(verbose, destDir, entry_toml):
 		if verbose:
 			print("# The remote hostname is {}".format(entry_toml['hostname']))
 
+
 def checkIfGather(verbose, localDir, entry_toml):
 	gather = False
 	if 'gather' in entry_toml:
@@ -226,6 +238,7 @@ def checkIfGather(verbose, localDir, entry_toml):
 			print("# --gather is turned ON! Collecting to {}".format(localDir))
 		gather = True
 	return gather
+
 
 @click.command()
 @click.option("--monitor", "-m", is_flag=True, default=False, help="Run in monitor mode.")
@@ -333,9 +346,11 @@ def main(entry, monitor, config_file, rsync_options, dryrun, verbose, listhosts)
 	else:
 		syncer()
 
+
 if __name__ == '__main__':
 	print("It looks like you called Rsync By Config via rbc.py!\n Consider using pip to install rbc as a package (with a command line tool): pip install https://github.com/AndiH/rsync-by-config/archive/master.zip.")
 	main(auto_envvar_prefix='RBC')
+
 
 def setupToolsWrap():
 	main(auto_envvar_prefix='RBC')
