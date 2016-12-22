@@ -31,8 +31,8 @@ class syncObject(object):
 		# self.gather = gather
 		self.config_file = self.globalCfg.configFilename
 		self.verbose = globalCfg.verbose
+
 	def parseSourceDirectory(self):
-	# def parseSourceDirectory(verbose, currentDir, configFilename, entry_toml):
 		"""Parse source directory and do some basic sanity checks."""
 		sourceDir = self.globalCfg.currentDir
 		if ('local_folder' or 'source_folder') in self.host_toml:
@@ -50,8 +50,8 @@ class syncObject(object):
 		if self.verbose:
 			print("# Using source folder {}".format(sourceDir))
 		self.localDir = sourceDir
+
 	def parseTargetDirectory(self):
-	# def parseTargetDirectory(verbose, entry, configFilename, entry_toml):
 		"""Parse target (old: remote) directory."""
 		if (not "remote_folder" or not "target_folder") in self.host_toml:
 			print("The entry {} does not have a target folder location. Please edit {}!".format(self.entry, self.globalCfg.configFilename))
@@ -65,9 +65,9 @@ class syncObject(object):
 			print("# The target folder path is {}".format(destDir))
 		self.destDir = destDir
 		self.sanityCheckTarget()
+
 	def sanityCheckTarget(self):
 		"""Do some limited sanity checking on target directory."""
-	# def sanityCheckTarget(verbose, destDir, entry_toml):
 		if "hostname" not in self.host_toml:
 			if self.verbose:
 				print("# No hostname specified. Targeting local transfers.")
@@ -79,9 +79,9 @@ class syncObject(object):
 		if "hostname" in self.host_toml:
 			if self.verbose:
 				print("# The remote hostname is {}".format(self.host_toml['hostname']))
+
 	def checkIfGather(self):
 		"""Check if gathering is enabled for entry."""
-	# def checkIfGather(verbose, localDir, entry_toml):
 		gather = False
 		if 'gather' in self.host_toml:
 			if self.verbose:
@@ -99,11 +99,13 @@ class configParameters(object):
 		self.configFilenameAbs = os.path.join(self.currentDir, configFilename)
 		self.rsync_options = None
 		self.dryrun = dryrun
+
 	def sanityCheckConfigFile(self):
 		"""Sanity-test config file."""
 		if not os.path.isfile(self.configFilenameAbs):
 			print("Please make sure {} exists in the current directory!".format(self.configFilename))
 			exit()
+
 	def loadConfig(self):
 		"""Read in TOML-structured config file."""
 		with open(self.configFilenameAbs) as f:
@@ -111,8 +113,9 @@ class configParameters(object):
 		if self.verbose:
 			print("# Loaded config file {}".format(self.configFilenameAbs))
 		self.config = config
+
 	def parseGlobalRsyncOptions(self):
-		"""Parses the global Rsync options specified at the very top of a TOML file."""
+		"""Parse global Rsync options specified at the very top of a TOML file."""
 		globalOptions = []
 		if "rsync_options" in self.config:
 			if self.verbose:
@@ -129,6 +132,7 @@ class configParameters(object):
 
 
 def sync(synObj):
+	"""Setup rsync with options from different sources and run rsync"""
 	rsync_opts = []
 	rsync_opts.append("--archive")  # archive
 	# rsync_opts.append("--update")  # skip files that are newer on the receiver
@@ -166,12 +170,15 @@ def sync(synObj):
 
 if thereIsWatchDog:
 	class syncEventHandler(FileSystemEventHandler):
+		"""Event handler for watchdog"""
 		def __init__(self, action=None):
 			super(syncEventHandler, self).__init__()
 			self.action = action
 			self.counter = 0
+
 		def getCounter(self):
 			return self.counter
+
 		def on_any_event(self, event):
 			super(syncEventHandler, self).on_any_event(event)
 
@@ -186,6 +193,7 @@ if thereIsWatchDog:
 
 
 def listHosts(config):
+	"""List all available hosts in TOML config file"""
 	if (config.verbose):
 		print("# Listing available host files")
 	print("Specified entries in {} are:".format(config.configFilename))
@@ -200,6 +208,7 @@ def listHosts(config):
 
 
 def parseDefaultEntry(verbose, config):
+	"""Search for config file entry with default = True"""
 	if verbose:
 		print("# No entry was explicitly specified; trying to determine from config file")
 	entry = list(config.keys())[-1]
@@ -213,6 +222,7 @@ def parseDefaultEntry(verbose, config):
 
 
 def sanityCheckEntries(cfg, entries):
+	"""Check if command-line-given entry(/ies) are found in config file."""
 	for entry in entries:
 		if entry not in cfg.config:
 			print("No entry {} is known in {}. Please edit the file!".format(entry, cfg.configFilename))
@@ -221,6 +231,7 @@ def sanityCheckEntries(cfg, entries):
 
 
 def parseMultiEntries(cfg, entry):
+	"""Parse one or more entries to synchronize with."""
 	multihost = False
 	entries = entry.split(",")
 	if len(entries) > 1:
@@ -235,6 +246,7 @@ def parseMultiEntries(cfg, entry):
 
 
 def parseEntry(cfg, entry):
+	"""Caller routine to determine target host(s)"""
 	if entry == "":
 		(entry, multihost) = parseDefaultEntry(cfg.verbose, cfg.config)
 	else:
@@ -278,11 +290,9 @@ def main(entry, monitor, config_file, rsync_options, dryrun, verbose, listhosts)
 		if verbose and thereIsWatchDog:
 			print('# Running in monitor mode.')
 
-	configFilename = config_file
+	cfgPars = configParameters(verbose, config_file, dryrun)
 
-	cfgPars = configParameters(verbose, configFilename, dryrun)
-
-	## Configuration file parsing
+	# Configuration file parsing
 	cfgPars.sanityCheckConfigFile()
 	cfgPars.loadConfig()
 
@@ -310,13 +320,13 @@ def main(entry, monitor, config_file, rsync_options, dryrun, verbose, listhosts)
 			print("No multihost")
 		entry_toml = cfgPars.config[entry[0]]
 
-	## Create syncObject
+	# Create syncObject
 	remote = syncObject(entry, cfgPars, entry_toml)
 	remote.parseSourceDirectory()
 	remote.parseTargetDirectory()
 	remote.checkIfGather()
 
-	## Set up monitoring
+	# Set up monitoring
 	syncer = lambda: sync(remote)
 
 	# syncer = lambda: map(sync, entry_toml, localDir, destDir, rsync_options, dryrun, gather, config_file, verbose)
