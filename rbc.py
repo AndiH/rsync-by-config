@@ -90,7 +90,7 @@ class syncObject(object):
 		self.gather = gather
 
 
-class configParameters(object):
+class globalParameters(object):
 	"""Holds all state/global information of the syncing process."""
 	def __init__(self, verbose, configFilename, dryrun):
 		self.verbose = verbose
@@ -104,10 +104,11 @@ class configParameters(object):
 		"""Sanity-test config file."""
 		if not os.path.isfile(self.configFilenameAbs):
 			print("Please make sure {} exists in the current directory!".format(self.configFilename))
-			exit()
+			exit(3)
 
 	def loadConfig(self):
 		"""Read in TOML-structured config file."""
+		self.sanityCheckConfigFile()
 		with open(self.configFilenameAbs) as f:
 			config = toml.loads(f.read())
 		if self.verbose:
@@ -129,6 +130,11 @@ class configParameters(object):
 			if self.verbose:
 				print("# List of rsync options due to command line and global key in config file: {}".format(globalOptions))
 		self.rsync_options = self.rsync_options + globalOptions
+
+	def parseRsyncOptions(self, cmdline_rsync_opts):
+		"""Parse Rsync options"""
+		self.rsync_options = list(cmdline_rsync_opts)
+		self.parseGlobalRsyncOptions()
 
 
 def sync(synObj):
@@ -290,10 +296,9 @@ def main(entry, monitor, config_file, rsync_options, dryrun, verbose, listhosts)
 		if verbose and thereIsWatchDog:
 			print('# Running in monitor mode.')
 
-	cfgPars = configParameters(verbose, config_file, dryrun)
+	cfgPars = globalParameters(verbose, config_file, dryrun)
 
 	# Configuration file parsing
-	cfgPars.sanityCheckConfigFile()
 	cfgPars.loadConfig()
 
 	# List hosts, if user flags it
@@ -301,11 +306,8 @@ def main(entry, monitor, config_file, rsync_options, dryrun, verbose, listhosts)
 		listHosts(cfgPars)
 		exit()
 
-	# Check for command line rsync parameters
-	cfgPars.rsync_options = list(rsync_options)
-
-	# Parse global rsync parameters (other global settings should be parsed here as well)
-	cfgPars.parseGlobalRsyncOptions()
+	# Parse global and command line rsync parameters
+	cfgPars.parseRsyncOptions(rsync_options)
 
 	# Try to determine which entry to take from the config file
 	(entry, multihost) = parseEntry(cfgPars, entry)
