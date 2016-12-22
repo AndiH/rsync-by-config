@@ -32,6 +32,14 @@ class syncObject(object):
 		self.config_file = self.globalCfg.configFilename
 		self.verbose = globalCfg.verbose
 
+		self.setup()
+
+	def setup(self):
+		"""Run different child routines to setup folders and options."""
+		self.parseSourceDirectory()
+		self.parseTargetDirectory()
+		self.checkIfGather()
+
 	def parseSourceDirectory(self):
 		"""Parse source directory and do some basic sanity checks."""
 		sourceDir = self.globalCfg.currentDir
@@ -99,6 +107,7 @@ class globalParameters(object):
 		self.configFilenameAbs = os.path.join(self.currentDir, configFilename)
 		self.rsync_options = None
 		self.dryrun = dryrun
+		self.multihost = None
 
 	def sanityCheckConfigFile(self):
 		"""Sanity-test config file."""
@@ -224,7 +233,7 @@ def parseDefaultEntry(verbose, config):
 				entry = en
 				print("# Found default entry {}".format(en))
 				print("Using entry: {}".format(en))
-	return ([entry], False)  # Multi host default entry not yet supported
+	return [entry]  # Multi host default entry not yet supported
 
 
 def sanityCheckEntries(cfg, entries):
@@ -238,26 +247,30 @@ def sanityCheckEntries(cfg, entries):
 
 def parseMultiEntries(cfg, entry):
 	"""Parse one or more entries to synchronize with."""
-	multihost = False
 	entries = entry.split(",")
-	if len(entries) > 1:
-		multihost = True
 	sanityCheckEntries(cfg, entries)
 	if cfg.verbose:
-		if multihost:
+		if cfg.multihost:
 			print("Using entries " + ", ".join(entries) + ".")
 		else:
 			print("# Using entry {}".format(entries))
-	return (entries, multihost)
+	return entries
+
+def isMultiremote(entries):
+	"""Determine if more than one remote host is requested"""
+	entries = entries.split(",")
+	if len(entries) > 1:
+		return True
+	else:
+		return False
 
 
-def parseEntry(cfg, entry):
+def parseEntries(cfg, entry):
 	"""Caller routine to determine target host(s)"""
 	if entry == "":
-		(entry, multihost) = parseDefaultEntry(cfg.verbose, cfg.config)
+		return parseDefaultEntry(cfg.verbose, cfg.config)
 	else:
-		(entry, multihost) = parseMultiEntries(cfg, entry)
-	return (entry, multihost)
+		return parseMultiEntries(cfg, entry)
 
 
 @click.command()
@@ -310,9 +323,10 @@ def main(entry, monitor, config_file, rsync_options, dryrun, verbose, listhosts)
 	cfgPars.parseRsyncOptions(rsync_options)
 
 	# Try to determine which entry to take from the config file
-	(entry, multihost) = parseEntry(cfgPars, entry)
+	cfgPars.multihost = isMultiremote(entry)
+	parsedEntries = parseEntries(cfgPars, entry)
 
-	if multihost:
+	if cfgPars.multihost:
 		# HANDLE MULTIHOST
 		print("Multihost only supported up to this stage of the program.")
 		exit()
@@ -320,13 +334,10 @@ def main(entry, monitor, config_file, rsync_options, dryrun, verbose, listhosts)
 		# DEFAULT CASE FOR NOW
 		if verbose:
 			print("No multihost")
-		entry_toml = cfgPars.config[entry[0]]
+		entry_toml = cfgPars.config[parsedEntries[0]]
 
 	# Create syncObject
-	remote = syncObject(entry, cfgPars, entry_toml)
-	remote.parseSourceDirectory()
-	remote.parseTargetDirectory()
-	remote.checkIfGather()
+	remote = syncObject(parsedEntries[0], cfgPars, entry_toml)
 
 	# Set up monitoring
 	syncer = lambda: sync(remote)
