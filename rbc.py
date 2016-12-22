@@ -338,12 +338,6 @@ def main(entry, monitor, config_file, rsync_options, dryrun, verbose, listhosts)
 
 	# syncer = lambda: map(sync, entry_toml, localDir, destDir, rsync_options, dryrun, gather, config_file, verbose)
 	# syncer = lambda: [a(en) for en in strings][0]
-	# if monitor:
-	# 	remote = remotes[0]
-	# 	syncer = syncers[0]
-	# 	if cfgPars.multihost:
-	# 		print("Multihost not yet supported for monitored syncing. Sorry. I still need to implement iterating over action= elements")
-	# 		exit()
 	if monitor and thereIsWatchDog:
 		for remote in remotes:
 			if remote.gather:

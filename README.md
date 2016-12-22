@@ -49,7 +49,7 @@ You should insert `~/bin/` into your `$PATH`, e.g. via `export PATH=$HOME/bin/:$
 
 The Python script has a few command line options, all documented via `rbc --help`:
 
-* **`ENTRY`**: The name of the entry in the config file to be used for synchronization. If not specified, the *default* entry is taken. If there's no default, the first entry is taken. Maybe, at least, since the read-in of the config file is not strongly controlled…
+* **`ENTRY`**: The name of the entry in the config file to be used for synchronization. If not specified, the *default* entry is taken. If there's no default, the first entry is taken. Maybe, at least, since the read-in of the config file is not strongly controlled… **New in 3.0**: Synchronize with multiple entries at the same time by specifying `entry,anotherentry` (comma-separated, no space)!
 * **`--monitor`**: Run Rsync By Config in monitoring (or *deamon*) mode. This will monitor the source folder for changes and issue a synchronization if one occurs. The package [Watchdog](https://github.com/gorakhargosh/watchdog) is used for this. (A more manual alternative to Watchdog is the command line utility [`fswatch`](https://github.com/emcrisostomo/fswatch), which can invoke arbitrary programs when a folder is changed.)
 * **`--confg_file=somefile`**: Specify a different config file. The default is `.sync.toml`.
 * **`--dryrun`**: Calls `rsync` with `--dryrun`, preventing all actual copies. Good for testing.
@@ -131,4 +131,4 @@ pip install sh toml click watchdog
 
 While non-essential for its core task, Watchdog is needed for the monitoring capabilities. The dependency is optional, though.
 
-When chosen the recommended way of installing Rsync By Config itself via `pip`, all dependencies are installed in the process.
+When choosing the recommended way of installation via `pip` all dependencies are installed in the process.
