@@ -174,16 +174,16 @@ def sync(synObj):
 	if synObj.verbose:
 		print("# All rsync options: {}".format(rsync_opts))
 
-	synObj.sourceDir = synObj.localDir + "/"  # make sure it has a trailing slash, for rsync
+	sourceDir = synObj.localDir + "/"  # make sure it has a trailing slash, for rsync
 	if 'hostname' in synObj.host_toml:
-		synObj.destDir = str(synObj.host_toml['hostname']) + ":" + synObj.destDir
+		destDir = str(synObj.host_toml['hostname']) + ":" + synObj.destDir
 
 	if synObj.gather:
-		synObj.sourceDir, synObj.destDir = synObj.destDir, synObj.sourceDir
+		sourceDir, destDir = destDir, sourceDir
 
 	if synObj.multihost:
 		print("Syncing with {}".format(synObj.entry))
-	print(rsync(rsync_opts, synObj.sourceDir, synObj.destDir))
+	print(rsync(rsync_opts, sourceDir, destDir))
 
 
 if thereIsWatchDog:
@@ -207,7 +207,8 @@ if thereIsWatchDog:
 			if self.action is not None and eligableForSync:
 				self.counter += 1
 				print("~~ Sync {} at {}".format(self.counter, datetime.now()))
-				self.action()
+				for act in self.action:
+					act()
 
 
 def listHosts(config):
@@ -337,23 +338,23 @@ def main(entry, monitor, config_file, rsync_options, dryrun, verbose, listhosts)
 
 	# syncer = lambda: map(sync, entry_toml, localDir, destDir, rsync_options, dryrun, gather, config_file, verbose)
 	# syncer = lambda: [a(en) for en in strings][0]
-	if monitor:
-		remote = remotes[0]
-		syncer = syncers[0]
-		if cfgPars.multihost:
-			print("Multihost not yet supported for monitored syncing. Sorry. I still need to implement iterating over action= elements")
-			exit()
-	if monitor and thereIsWatchDog and not remote.gather:
-		# TODO:
-		# 	* and not remote.gather: needs to be checked for all remotes
-		#	* remote.localDir: How should this be handled?
-		#	* syncer → syncers
-		# 
-		# for act in self.action:
-		# 	act()
-		event_handler = syncEventHandler(action=syncer)
+	# if monitor:
+	# 	remote = remotes[0]
+	# 	syncer = syncers[0]
+	# 	if cfgPars.multihost:
+	# 		print("Multihost not yet supported for monitored syncing. Sorry. I still need to implement iterating over action= elements")
+	# 		exit()
+	if monitor and thereIsWatchDog:
+		for remote in remotes:
+			if remote.gather:
+				print("{} entry is configured to gather from remote to local. This does not work in monitoring configurtion.".format(remote.entry))
+				exit(7)
+			if 'local_folder' in remote.host_toml or 'source_folder' in remote.host_toml:
+				if cfgPars.multihost:
+					print("{current_entry} entry specifies a source directory for monitoring, {current_localDir}. Note that only the source directory of the first entry, {first_localDir}, is monitored!".format(current_entry=remote.entry, current_localDir=remote.localDir, first_localDir=remotes[0].localDir))
+		event_handler = syncEventHandler(action=syncers)
 		observer = Observer()
-		observer.schedule(event_handler, remote.localDir, recursive=True)
+		observer.schedule(event_handler, remotes[0].localDir, recursive=True)
 		observer.start()
 		try:
 			while True:
