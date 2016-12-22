@@ -20,10 +20,10 @@ except ImportError:
 
 class syncObject(object):
 	"""One sync target and its configuration. More or less equal to one config file entry, parsed."""
-	def __init__(self, entry, globalCfg, host_toml):
-		self.entry = entry
+	def __init__(self, entryName, globalCfg):
+		self.entry = entryName
 		self.globalCfg = globalCfg
-		self.host_toml = host_toml
+		self.host_toml = globalCfg.config[entryName]
 		# self.localDir = localDir
 		# self.destDir = destDir
 		self.rsync_options = self.globalCfg.rsync_options
@@ -31,6 +31,7 @@ class syncObject(object):
 		# self.gather = gather
 		self.config_file = self.globalCfg.configFilename
 		self.verbose = globalCfg.verbose
+		self.multihost = globalCfg.multihost
 
 		self.setup()
 
@@ -43,7 +44,7 @@ class syncObject(object):
 	def parseSourceDirectory(self):
 		"""Parse source directory and do some basic sanity checks."""
 		sourceDir = self.globalCfg.currentDir
-		if ('local_folder' or 'source_folder') in self.host_toml:
+		if 'local_folder' in self.host_toml or 'source_folder' in self.host_toml:
 			if 'source_folder' in self.host_toml:
 				sourceDirUntested = self.host_toml['source_folder']
 			else:
@@ -51,7 +52,7 @@ class syncObject(object):
 				sourceDirUntested = self.host_toml['local_folder']
 			if not (os.path.isdir(sourceDirUntested) and os.path.exists(sourceDirUntested)):
 				print("You specified the source folder {} to be synced. This folder does not exist!".format(sourceDirUntested))
-				exit()
+				exit(6)
 			sourceDir = sourceDirUntested
 			if self.verbose:
 				print("# Running with explicit source folder {}".format(sourceDir))
@@ -61,9 +62,9 @@ class syncObject(object):
 
 	def parseTargetDirectory(self):
 		"""Parse target (old: remote) directory."""
-		if (not "remote_folder" or not "target_folder") in self.host_toml:
+		if not (("remote_folder" in self.host_toml) or ("target_folder" in self.host_toml)):
 			print("The entry {} does not have a target folder location. Please edit {}!".format(self.entry, self.globalCfg.configFilename))
-			exit()
+			exit(7)
 		if "remote_folder" in self.host_toml:
 			print("Warning: Key `remote_folder` is deprecated. Please use `target_folder`!\nThe following command will in-place modify the file:\n\tsed -i -- 's/remote_folder/target_folder/g' {}".format(self.globalCfg.configFilename))
 			destDir = self.host_toml['remote_folder']
@@ -81,7 +82,7 @@ class syncObject(object):
 				print("# No hostname specified. Targeting local transfers.")
 			if not (os.path.isdir(self.destDir) and os.path.exists(self.destDir)):
 				print("You specified the target folder {}. This folder does not exist!".format(self.destDir))
-				exit(6)
+				exit(8)
 			if self.verbose:
 				print("# Running with local target folder {}".format(self.destDir))
 		if "hostname" in self.host_toml:
@@ -112,7 +113,7 @@ class globalParameters(object):
 	def sanityCheckConfigFile(self):
 		"""Sanity-test config file."""
 		if not os.path.isfile(self.configFilenameAbs):
-			print("Please make sure {} exists in the current directory!".format(self.configFilename))
+			print("Config file not found! Please make sure {} exists in the current directory!".format(self.configFilename))
 			exit(3)
 
 	def loadConfig(self):
@@ -180,6 +181,8 @@ def sync(synObj):
 	if synObj.gather:
 		synObj.sourceDir, synObj.destDir = synObj.destDir, synObj.sourceDir
 
+	if synObj.multihost:
+		print("Syncing with {}".format(synObj.entry))
 	print(rsync(rsync_opts, synObj.sourceDir, synObj.destDir))
 
 
@@ -242,7 +245,7 @@ def sanityCheckEntries(cfg, entries):
 		if entry not in cfg.config:
 			print("No entry {} is known in {}. Please edit the file!".format(entry, cfg.configFilename))
 			listHosts(cfg)
-			exit(5)
+			exit(4)
 
 
 def parseMultiEntries(cfg, entry):
@@ -326,25 +329,28 @@ def main(entry, monitor, config_file, rsync_options, dryrun, verbose, listhosts)
 	cfgPars.multihost = isMultiremote(entry)
 	parsedEntries = parseEntries(cfgPars, entry)
 
-	if cfgPars.multihost:
-		# HANDLE MULTIHOST
-		print("Multihost only supported up to this stage of the program.")
-		exit()
-	else:
-		# DEFAULT CASE FOR NOW
-		if verbose:
-			print("No multihost")
-		entry_toml = cfgPars.config[parsedEntries[0]]
-
-	# Create syncObject
-	remote = syncObject(parsedEntries[0], cfgPars, entry_toml)
+	# Create syncObjects
+	remotes = [syncObject(entr, cfgPars) for entr in parsedEntries]
 
 	# Set up monitoring
-	syncer = lambda: sync(remote)
+	syncers = [lambda z=entry: sync(z) for entry in remotes]
 
 	# syncer = lambda: map(sync, entry_toml, localDir, destDir, rsync_options, dryrun, gather, config_file, verbose)
 	# syncer = lambda: [a(en) for en in strings][0]
+	if monitor:
+		remote = remotes[0]
+		syncer = syncers[0]
+		if cfgPars.multihost:
+			print("Multihost not yet supported for monitored syncing. Sorry. I still need to implement iterating over action= elements")
+			exit()
 	if monitor and thereIsWatchDog and not remote.gather:
+		# TODO:
+		# 	* and not remote.gather: needs to be checked for all remotes
+		#	* remote.localDir: How should this be handled?
+		#	* syncer → syncers
+		# 
+		# for act in self.action:
+		# 	act()
 		event_handler = syncEventHandler(action=syncer)
 		observer = Observer()
 		observer.schedule(event_handler, remote.localDir, recursive=True)
@@ -358,7 +364,8 @@ def main(entry, monitor, config_file, rsync_options, dryrun, verbose, listhosts)
 			observer.stop()
 		observer.join()
 	else:
-		syncer()
+		for syncer in syncers:
+			syncer()
 
 
 if __name__ == '__main__':
