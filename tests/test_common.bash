@@ -9,7 +9,7 @@ fi
 if [[ $SYSTEM == "MAC" ]]; then
 	PREFIX="$(brew --prefix)/lib"
 elif [[ $SYSTEM == "LINUX" ]]; then
-	RPREFIX="test/test_helper"
+	RPREFIX="$PWD/test/test_helper"
 fi
 load "${PREFIX}/bats-support/load.bash"
 load "${PREFIX}/bats-assert/load.bash"
