@@ -1,0 +1,3 @@
+[otherhost]
+	hostname = "coba"
+	target_folder = "~/tests/rbc"

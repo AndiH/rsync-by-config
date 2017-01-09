@@ -1,0 +1,18 @@
+[coba]
+	hostname = "coba"
+	target_folder = "~/tests/rbc"
+	default = true
+
+[cobaTwo]
+	hostname = "coba"
+	target_folder = "~/tests/rbc"
+
+[wrongsource]
+	hostname = "coba"
+	source_folder = "~/RBC/"
+
+[notarget]
+	hostname = "coba"
+
+[localbutwrongsource]
+	target_folder = "~/RBC/"
