@@ -1,0 +1,7 @@
+language: bash
+before_install:
+  - ./tests/install-bats.sh
+before_script:
+  - export PATH="${HOME}/.local/bin:${PATH}"
+script:
+  - (cd tests; bats travis_test.bats)

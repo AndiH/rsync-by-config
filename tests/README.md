@@ -9,3 +9,7 @@ Currently implemented:
 * `test.bats`: Some basic tests plus all those not fitting in other categories
 * `test_cmdline.bats`: For command line parameters of RBC
 * `test_exit.bats`: Test exit codes for common errors (which are not really caught exceptions but rather `exit(I)`s)
+
+## Ressources for Travis
+
+https://oncletom.io/2016/travis-ssh-deploy/
