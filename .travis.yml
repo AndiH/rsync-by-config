@@ -23,4 +23,5 @@ install:
 before_script:
   - export PATH="${HOME}/.local/bin:${PATH}"
 script:
+  - ../rbc.py lhost
   - (cd tests; bats travis_test.bats)

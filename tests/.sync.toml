@@ -16,3 +16,7 @@
 
 [localbutwrongsource]
 	target_folder = "~/RBC/"
+
+[lhost]
+	hostname = "localhost"
+	target_folder = "~/tests/rbc/"
