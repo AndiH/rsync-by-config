@@ -11,7 +11,7 @@ addons:
 
 before_install:
   - ssh-keygen -b 2048 -t rsa -q -N "" -f ~/.ssh/id_rsa
-  - echo "NoHostAuthenticationForLocalhost yes" >> ~/.ssh/config
+  - cp tests/ssh_config ~/.ssh/config
   - docker pull rastasheep/ubuntu-sshd
   - docker run -d -p 2222:22 --name docker_sshd rastasheep/ubuntu-sshd
   - sshpass -p "root" ssh-copy-id -p 2222 root@localhost

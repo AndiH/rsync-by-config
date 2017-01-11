@@ -18,5 +18,5 @@
 	target_folder = "~/RBC/"
 
 [lhost]
-	hostname = "localhost"
+	hostname = "lhost"
 	target_folder = "~/tests/rbc/"
