@@ -17,8 +17,9 @@ before_install:
   - sshpass -p "root" ssh-copy-id -p 2222 root@localhost
   - ssh -p 2222 root@localhost "echo 'Im in!'"
   - ./tests/install-bats.sh
-  - which python
-  - which python3
+install:
+  - pwd
+  - pip install .
 before_script:
   - export PATH="${HOME}/.local/bin:${PATH}"
 script:
