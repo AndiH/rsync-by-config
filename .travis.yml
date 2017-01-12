@@ -12,6 +12,7 @@ addons:
 before_install:
 - openssl aes-256-cbc -K $encrypted_22e99d9f117d_key -iv $encrypted_22e99d9f117d_iv
   -in tests/test_rsa.enc -out tests/test_rsa -d
+- chmod 600 tests/test_rsa
 - ssh -i tests/test_rsa -o StrictHostKeyChecking=no rsynctest@$TEST_HOST "ls ."
 - ssh-keygen -b 2048 -t rsa -q -N "" -f ~/.ssh/id_rsa
 - cp tests/ssh_config ~/.ssh/config
