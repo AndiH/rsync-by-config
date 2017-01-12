@@ -28,6 +28,6 @@ before_script:
   - export PATH="${HOME}/.local/bin:${PATH}"
   - cd tests
 script:
-  - rsync --archive --human-readable -vvvvv --recursive --compress --cvs-exclude --exclude=*.bin --exclude=.sync.toml $PWD/ lhost:~/
+  - rsync --archive --human-readable -vvvvv --recursive --compress --cvs-exclude --exclude=*.bin --exclude=.sync.toml -p 2222 $PWD/ root@localhost~/
   - ssh lhost "ls -a ."
   - bats travis_test.bats
