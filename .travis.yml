@@ -16,6 +16,7 @@ before_install:
 - ssh -i tests/test_rsa -o StrictHostKeyChecking=no rsynctest@$TEST_HOST "ls ."
 - ssh-keygen -b 2048 -t rsa -q -N "" -f ~/.ssh/id_rsa
 - cp tests/ssh_config ~/.ssh/config
+- chmod 600 ~/.ssh/config
 - docker pull rastasheep/ubuntu-sshd
 - docker run -d -p 2222:22 --name docker_sshd rastasheep/ubuntu-sshd
 - sshpass -p "root" ssh-copy-id -p 2222 root@localhost
