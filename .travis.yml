@@ -33,8 +33,8 @@ script:
   - rsync --archive --human-readable -v --recursive --compress --cvs-exclude --exclude=*.bin --exclude=.sync.toml . root@lhost~/
   - rsync --archive --human-readable -v --recursive --compress --cvs-exclude --exclude=*.bin --exclude=.sync.toml . lhost~/
   - ls -al
-  - rsync --archive --human-readable -v --recursive --compress --cvs-exclude --exclude=*.bin --exclude=.sync.toml . lhost:~/
+  - rsync --archive --human-readable -vvv --recursive --compress --cvs-exclude --exclude=*.bin --exclude=.sync.toml . lhost:~/
   - rsync --archive --human-readable -v --recursive --compress --cvs-exclude --exclude=*.bin --exclude=.sync.toml -e "ssh -F $HOME/.ssh/config" . lhost~/
-  - rsync --archive --human-readable -v --recursive --compress --cvs-exclude --exclude=*.bin --exclude=.sync.toml -e "ssh -F $HOME/.ssh/config" . lhost:~/
+  - rsync --archive --human-readable -vvvv --recursive --compress --cvs-exclude --exclude=*.bin --exclude=.sync.toml -e "ssh -F $HOME/.ssh/config" . lhost:~/
   - ssh lhost "ls -a ."
   - bats travis_test.bats
