@@ -23,5 +23,4 @@ before_script:
 - export PATH="${HOME}/.local/bin:${PATH}"
 - cd tests
 script:
-- bats travis_test.bats
 - bats test.bats
