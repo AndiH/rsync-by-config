@@ -20,8 +20,6 @@ before_install:
 - ssh lhost "echo 'Im still in?'"
 - ssh lhost "apt-get install -yq rsync"
 - "./tests/install-bats.sh"
-- which rsync
-- rsync --version
 install:
 - pwd
 - pip install .
@@ -31,8 +29,6 @@ before_script:
 script:
 - rsync --archive --human-readable -vvv --recursive --compress --cvs-exclude --exclude=*.bin
   --exclude=.sync.toml . lhost:~/
-- rsync --archive --human-readable -vvvv --recursive --compress --cvs-exclude --exclude=*.bin
-  --exclude=.sync.toml -e "ssh -F $HOME/.ssh/config" . lhost:~/
 - ssh lhost "ls -a ."
 - bats travis_test.bats
 - ls -al ~/.ssh/config
