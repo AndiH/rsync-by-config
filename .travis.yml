@@ -10,10 +10,10 @@ addons:
     - sshpass
     - rsync
 before_install:
-- openssl aes-256-cbc -K $encrypted_22e99d9f117d_key -iv $encrypted_22e99d9f117d_iv
+# - openssl aes-256-cbc -K $encrypted_22e99d9f117d_key -iv $encrypted_22e99d9f117d_iv
   -in tests/test_rsa.enc -out tests/test_rsa -d
-- chmod 600 tests/test_rsa
-- ssh -i tests/test_rsa -o StrictHostKeyChecking=no rsynctest@$TEST_HOST "ls ."
+# - chmod 600 tests/test_rsa
+# - ssh -i tests/test_rsa -o StrictHostKeyChecking=no rsynctest@$TEST_HOST "ls ."
 - ssh-keygen -b 2048 -t rsa -q -N "" -f ~/.ssh/id_rsa
 - cp tests/ssh_config ~/.ssh/config
 - chmod 600 ~/.ssh/config
@@ -22,6 +22,7 @@ before_install:
 - sshpass -p "root" ssh-copy-id -p 2222 root@localhost
 - ssh -p 2222 root@localhost "echo 'Im in!'"
 - ssh lhost "echo 'Im still in?'"
+- ssh lhost "apt-get install -yq rsync"
 - "./tests/install-bats.sh"
 - which rsync
 - rsync --version
@@ -32,19 +33,8 @@ before_script:
 - export PATH="${HOME}/.local/bin:${PATH}"
 - cd tests
 script:
-- rsync --archive --human-readable -v --recursive --compress --cvs-exclude --exclude=*.bin
-  --exclude=.sync.toml --port 2222 . root@localhost~/
-- rsync --archive --human-readable -v --recursive --compress --cvs-exclude --exclude=*.bin
-  --exclude=.sync.toml . root@localhost~/
-- rsync --archive --human-readable -v --recursive --compress --cvs-exclude --exclude=*.bin
-  --exclude=.sync.toml . root@lhost~/
-- rsync --archive --human-readable -v --recursive --compress --cvs-exclude --exclude=*.bin
-  --exclude=.sync.toml . lhost~/
-- ls -al
 - rsync --archive --human-readable -vvv --recursive --compress --cvs-exclude --exclude=*.bin
   --exclude=.sync.toml . lhost:~/
-- rsync --archive --human-readable -v --recursive --compress --cvs-exclude --exclude=*.bin
-  --exclude=.sync.toml -e "ssh -F $HOME/.ssh/config" . lhost~/
 - rsync --archive --human-readable -vvvv --recursive --compress --cvs-exclude --exclude=*.bin
   --exclude=.sync.toml -e "ssh -F $HOME/.ssh/config" . lhost:~/
 - ssh lhost "ls -a ."
