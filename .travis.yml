@@ -25,3 +25,4 @@ before_script:
 script:
 - bats test.bats
 - bats test_exitcodes.bats
+- bats test_cmdline.bats

@@ -4,19 +4,28 @@ load test_common
 
 @test "List hosts" {
 	run ../rbc.py --listhosts
-	[ ${lines[2]} = "Specified entries in .sync.toml are:" ]
+	assert_output --partial "Specified entries in .sync.toml are:"
 }
 
 @test "Verbose output" {
+	setup() {
+		initRemote
+	}
 	teardown() {
 		cleanRemote
 	}
-	run ../rbc.py --verbose coba
+	run ../rbc.py --verbose lhost
 	assert_output --partial 'Running rbc.py in verbose mode.'
 }
 
 @test "Dryrun" {
-	run ../rbc.py --dryrun coba
+	setup() {
+		initRemote
+	}
+	teardown() {
+		cleanRemote
+	}
+	run ../rbc.py --dryrun lhost
 	assert_output --partial '(DRY RUN)'
 }
 
