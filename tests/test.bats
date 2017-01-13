@@ -3,18 +3,23 @@
 load test_common
 
 @test "Config file exists" {
-	run stat .sync.toml
-	[ $status = 0 ]
+	# run stat .sync.toml
+	# [ $status = 0 ]
+	assert_file_exist .sync.toml
 }
 
 @test "rbc.py exists in parent directory" {
-	run stat ../rbc.py
-	[ $status = 0 ]
+	# run stat ../rbc.py
+	# [ $status = 0 ]
+	assert_file_exist ../rbc.py
 }
 
 @test "Sync with lhost host (current dir)" {
+	setup() {
+		initRemote lhost
+	}
 	teardown() {
-		cleanRemote
+		cleanRemote lhost
 	}
 	run ../rbc.py lhost
 	# [ ${lines[2]} = "sending incremental file list" ]
@@ -22,8 +27,11 @@ load test_common
 }
 
 @test "Sync with no host given (current dir)" {
+	setup() {
+		initRemote lhost
+	}
 	teardown() {
-		cleanRemote
+		cleanRemote lhost
 	}
 	run ../rbc.py
 	# [ ${lines[2]} = "# Found default entry" ]
