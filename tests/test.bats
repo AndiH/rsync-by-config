@@ -12,11 +12,11 @@ load test_common
 	[ $status = 0 ]
 }
 
-@test "Sync with coba host (current dir)" {
+@test "Sync with lhost host (current dir)" {
 	teardown() {
 		cleanRemote
 	}
-	run ../rbc.py coba
+	run ../rbc.py lhost
 	# [ ${lines[2]} = "sending incremental file list" ]
 	assert_output --partial 'sending incremental file list'
 }
@@ -26,7 +26,7 @@ load test_common
 		cleanRemote
 	}
 	run ../rbc.py
-	[ ${lines[2]} = "# Found default entry coba" ]
+	[ ${lines[2]} = "# Found default entry" ]
 }
 
 @test "Host unknown" {

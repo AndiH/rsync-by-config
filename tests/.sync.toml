@@ -1,7 +1,6 @@
 [coba]
 	hostname = "coba"
 	target_folder = "~/tests/rbc"
-	default = true
 
 [cobaTwo]
 	hostname = "coba"
@@ -20,3 +19,4 @@
 [lhost]
 	hostname = "lhost"
 	target_folder = "~/tests/rbc/"
+	default = true

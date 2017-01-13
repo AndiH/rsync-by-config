@@ -8,7 +8,6 @@ addons:
   apt:
     packages:
     - sshpass
-    - rsync
 before_install:
 - ssh-keygen -b 2048 -t rsa -q -N "" -f ~/.ssh/id_rsa
 - cp tests/ssh_config ~/.ssh/config
@@ -16,8 +15,6 @@ before_install:
 - docker pull rastasheep/ubuntu-sshd
 - docker run -d -p 2222:22 --name docker_sshd rastasheep/ubuntu-sshd
 - sshpass -p "root" ssh-copy-id -p 2222 root@localhost
-- ssh -p 2222 root@localhost "echo 'Im in!'"
-- ssh lhost "echo 'Im still in?'"
 - ssh lhost "apt-get install -yq rsync"
 - "./tests/install-bats.sh"
 install:
@@ -27,8 +24,6 @@ before_script:
 - export PATH="${HOME}/.local/bin:${PATH}"
 - cd tests
 script:
-- rsync --archive --human-readable -v --recursive --compress --cvs-exclude --exclude=*.bin
-  --exclude=.sync.toml . lhost:~/tst/
-- ssh lhost "ls -a ."
+- ../rbc.py lhost
 - bats travis_test.bats
-- ls -al ~/.ssh/config
+- bats test.bats
