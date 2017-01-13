@@ -7,11 +7,11 @@
 	target_folder = "~/tests/rbc"
 
 [wrongsource]
-	hostname = "coba"
+	hostname = "lhost"
 	source_folder = "~/RBC/"
 
 [notarget]
-	hostname = "coba"
+	hostname = "lhost"
 
 [localbutwrongsource]
 	target_folder = "~/RBC/"

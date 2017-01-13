@@ -24,3 +24,4 @@ before_script:
 - cd tests
 script:
 - bats test.bats
+- bats test_exitcodes.bats
