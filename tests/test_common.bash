@@ -15,5 +15,5 @@ load "${PREFIX}/bats-support/load.bash"
 load "${PREFIX}/bats-assert/load.bash"
 
 function cleanRemote() {
-	ssh coba "rm ~/tests/rbc/*"
+	ssh lhost "rm ~/tests/rbc/*"
 }
