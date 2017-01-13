@@ -1,4 +1,6 @@
-# Tests for Rsync-by-Config
+# Tests for Rsync by Config
+
+[![Build Status](https://travis-ci.org/AndiH/rsync-by-config.svg?branch=tests)](https://travis-ci.org/AndiH/rsync-by-config)
 
 The tests in this directory are work in progress.
 
@@ -10,7 +12,7 @@ Currently implemented:
 * `test_cmdline.bats`: For command line parameters of RBC
 * `test_exit.bats`: Test exit codes for common errors (which are not really caught exceptions but rather `exit(I)`s)
 
-## Ressources for Travis
+## Resources for Travis
 
 * https://oncletom.io/2016/travis-ssh-deploy/
 * https://gist.github.com/lukewpatterson/4242707
