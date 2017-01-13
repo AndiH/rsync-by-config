@@ -15,10 +15,11 @@ load "${PREFIX}/bats-support/load.bash"
 load "${PREFIX}/bats-assert/load.bash"
 load "${PREFIX}/bats-file/load.bash"
 
-function cleanRemote() {
-	ssh $1 "rm ~/tests/rbc/*"
+function initRemote() {
+	ssh lhost "mkdir -p ~/tests/rbc/"
 }
 
-function initRemote() {
-	ssh $1 "mkdir -p ~/tests/rbc/"
+function cleanRemote() {
+	ssh lhost "rm -r ~/tests/rbc"
 }
+

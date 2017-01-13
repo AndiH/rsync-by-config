@@ -16,10 +16,10 @@ load test_common
 
 @test "Sync with lhost host (current dir)" {
 	setup() {
-		initRemote lhost
+		initRemote
 	}
 	teardown() {
-		cleanRemote lhost
+		cleanRemote
 	}
 	run ../rbc.py lhost
 	# [ ${lines[2]} = "sending incremental file list" ]
@@ -28,10 +28,10 @@ load test_common
 
 @test "Sync with no host given (current dir)" {
 	setup() {
-		initRemote lhost
+		initRemote
 	}
 	teardown() {
-		cleanRemote lhost
+		cleanRemote
 	}
 	run ../rbc.py
 	# [ ${lines[2]} = "# Found default entry" ]
