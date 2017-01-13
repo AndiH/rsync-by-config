@@ -26,7 +26,8 @@ load test_common
 		cleanRemote
 	}
 	run ../rbc.py
-	[ ${lines[2]} = "# Found default entry" ]
+	# [ ${lines[2]} = "# Found default entry" ]
+	assert_output --partial "# Found default entry"
 }
 
 @test "Host unknown" {
