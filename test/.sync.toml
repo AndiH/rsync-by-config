@@ -1,10 +1,10 @@
 [coba]
 	hostname = "coba"
-	target_folder = "~/tests/rbc"
+	target_folder = "~/test/rbc"
 
 [cobaTwo]
 	hostname = "coba"
-	target_folder = "~/tests/rbc"
+	target_folder = "~/test/rbc"
 
 [wrongsource]
 	hostname = "lhost"
@@ -18,5 +18,5 @@
 
 [lhost]
 	hostname = "lhost"
-	target_folder = "~/tests/rbc/"
+	target_folder = "~/test/rbc/"
 	default = true

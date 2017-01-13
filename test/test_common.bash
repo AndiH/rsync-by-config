@@ -16,10 +16,10 @@ load "${PREFIX}/bats-assert/load.bash"
 load "${PREFIX}/bats-file/load.bash"
 
 function initRemote() {
-	ssh lhost "mkdir -p ~/tests/rbc/"
+	ssh lhost "mkdir -p ~/test/rbc/"
 }
 
 function cleanRemote() {
-	ssh lhost "rm -rf ~/tests"
+	ssh lhost "rm -rf ~/test"
 }
 
