@@ -20,6 +20,6 @@ function initRemote() {
 }
 
 function cleanRemote() {
-	ssh lhost "rm -r ~/tests/rbc"
+	ssh lhost "rm -rf ~/tests/rbc"
 }
 
