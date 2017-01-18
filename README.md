@@ -105,13 +105,15 @@ Rsync By Config also supports transfers from a remote host to the local machine 
 ```toml
 [inversehost]
     hostname = "second"
-    source_folder = "/some/thing/"
-    target_folder = "/some/thang/"
+    source_folder = "/some/target/"
+    target_folder = "/some/source/"
     gather = true
     rsync_options = ["--update"]
 ```
 
 The `gather` option is the important one. It switches the order of source and destination in the underlying `rsync` call.
+
+*Note*: Due to the implementation, gather only switches the order of source and destination in the very last step. A result: `source_folder` becomes the target of the `rsync` transfer, and `target_folder` the actual source. If this bothers you, let me know.
 
 ### Local Transfers
 For copying on the same machine, Rsync By Config supports *host-less* operations between a source directory and a target directory. This mode is enabled if the `hostname` key of the respective entry in the config file is missing. In this case, the script also checks for `target_folder` to be a valid directory on the current machine. Example config file:
