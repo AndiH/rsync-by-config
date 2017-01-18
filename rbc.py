@@ -175,6 +175,7 @@ def sync(synObj):
 		print("# All rsync options: {}".format(rsync_opts))
 
 	sourceDir = synObj.localDir + "/"  # make sure it has a trailing slash, for rsync
+	destDir = synObj.destDir
 	if 'hostname' in synObj.host_toml:
 		destDir = str(synObj.host_toml['hostname']) + ":" + synObj.destDir
 
