@@ -1,11 +1,3 @@
-[coba]
-	hostname = "coba"
-	target_folder = "~/test/rbc"
-
-[cobaTwo]
-	hostname = "coba"
-	target_folder = "~/test/rbc"
-
 [wrongsource]
 	hostname = "lhost"
 	source_folder = "~/RBC/"
@@ -20,3 +12,22 @@
 	hostname = "lhost"
 	target_folder = "~/test/rbc/"
 	default = true
+
+[lhostVerbose]
+	hostname = "lhost"
+	target_folder = "~/test/rbc/"
+	rsync_options = ["--dry-run", "-v"]
+
+[lhostSource]
+	hostname = "lhost"
+	target_folder = "~/test/rbc/"
+	source_folder = "source/"
+
+[lhostInverse]
+	hostname = "lhost"
+    target_folder = "~/test/rbc/"
+    source_folder = "gather/"
+    gather = true
+
+[local]
+	target_folder = "local/"

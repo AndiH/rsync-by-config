@@ -26,18 +26,6 @@ load test_common
 	assert_output --partial 'sending incremental file list'
 }
 
-@test "Sync with no host given (current dir)" {
-	setup() {
-		initRemote
-	}
-	teardown() {
-		cleanRemote
-	}
-	run ../rbc.py
-	# [ ${lines[2]} = "# Found default entry" ]
-	assert_output --partial "# Found default entry"
-}
-
 @test "Host unknown" {
 	run ../rbc.py abc
 	assert_output --partial "No entry abc is known in .sync.toml. Please edit the file!"

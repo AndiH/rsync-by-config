@@ -26,3 +26,5 @@ script:
 - bats test.bats
 - bats test_exitcodes.bats
 - bats test_cmdline.bats
+- bats test_envvars.bats
+- bats test_configfileoptions.bats
