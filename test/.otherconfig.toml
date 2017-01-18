@@ -1,0 +1,5 @@
+rsync_options = ['-v']
+
+[otherhost]
+	hostname = "lhost"
+	target_folder = "~/test/rbc/"

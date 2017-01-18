@@ -1,0 +1,33 @@
+[wrongsource]
+	hostname = "lhost"
+	source_folder = "~/RBC/"
+
+[notarget]
+	hostname = "lhost"
+
+[localbutwrongsource]
+	target_folder = "~/RBC/"
+
+[lhost]
+	hostname = "lhost"
+	target_folder = "~/test/rbc/"
+	default = true
+
+[lhostVerbose]
+	hostname = "lhost"
+	target_folder = "~/test/rbc/"
+	rsync_options = ["--dry-run", "-v"]
+
+[lhostSource]
+	hostname = "lhost"
+	target_folder = "~/test/rbc/"
+	source_folder = "source/"
+
+[lhostInverse]
+	hostname = "lhost"
+    target_folder = "~/test/rbc/"
+    source_folder = "gather/"
+    gather = true
+
+[local]
+	target_folder = "local/"

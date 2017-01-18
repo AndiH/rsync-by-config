@@ -1,0 +1,16 @@
+NoHostAuthenticationForLocalhost yes
+
+Host lhost
+	Hostname localhost
+	Port 2222
+	User root
+
+Host firsthost
+  User root
+  Port 2222
+  Hostname localhost
+
+Host secondhost
+  User root
+  Port 2222
+  Hostname localhost

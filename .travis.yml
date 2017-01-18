@@ -1,0 +1,30 @@
+language: python
+python:
+- '3.5'
+sudo: required
+services:
+- docker
+addons:
+  apt:
+    packages:
+    - sshpass
+before_install:
+- ssh-keygen -b 2048 -t rsa -q -N "" -f ~/.ssh/id_rsa
+- cp test/ssh_config ~/.ssh/config
+- chmod 600 ~/.ssh/config
+- docker pull rastasheep/ubuntu-sshd
+- docker run -d -p 2222:22 --name docker_sshd rastasheep/ubuntu-sshd
+- sshpass -p "root" ssh-copy-id -p 2222 root@localhost
+- ssh lhost "apt-get install -yq rsync"
+- "./test/install-bats.sh"
+install:
+- pip install .
+before_script:
+- export PATH="${HOME}/.local/bin:${PATH}"
+- cd test
+script:
+- bats test.bats
+- bats test_exitcodes.bats
+- bats test_cmdline.bats
+- bats test_envvars.bats
+- bats test_configfileoptions.bats
