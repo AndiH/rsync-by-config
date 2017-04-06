@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*
 # sync.py by Andreas Herten, Feb+ 2016
 
 import os

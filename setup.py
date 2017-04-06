@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
 	name='rsync-by-config',
-	version='3.1',
+	version='3.1b',
 	author='Andreas Herten',
 	author_email='a.herten@gmail.com',
 	url='https://github.com/AndiH/rsync-by-config',
