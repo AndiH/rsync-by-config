@@ -15,7 +15,7 @@ before_install:
 - docker pull rastasheep/ubuntu-sshd
 - docker run -d -p 2222:22 --name docker_sshd rastasheep/ubuntu-sshd
 - sshpass -p "root" ssh-copy-id -p 2222 root@localhost
-- ssh lhost "apt-get install -yq rsync"
+- ssh lhost "apt-get update && apt-get install -yq rsync"
 - "./test/install-bats.sh"
 install:
 - pip install .
