@@ -291,7 +291,7 @@ def parseEntries(cfg, entry):
 @click.option("--listhosts", is_flag=True, help="List available hosts in config_file.")
 @click.argument('entry', default="")
 def main(entry, monitor, config_file, rsync_options, dryrun, verbose, listhosts):
-	"""Use the entry of ENTRY in config_file to synchronize the files of the current directory to. If ENTRY is not specified, the entry of config_file with 'default = true' is taken. If no default entry is specified, some entry is taken (which might be the first in the config file, but does not need to be).
+	"""Use the entry of ENTRY in config_file to synchronize the files of the current directory to. If ENTRY is not specified, the entry of config_file specified as a global 'default = ENTRY' is taken. If no default key is specified, some entry is taken (which is usually but not guaranteed to be the first).
 
 
 	The structure of the config file should be of the following:
@@ -299,8 +299,7 @@ def main(entry, monitor, config_file, rsync_options, dryrun, verbose, listhosts)
 	[entry]\n
 		hostname = \"remotecomputer\"\n
 		target_folder = \"/user/myuser/directory/\"\n
-		rsync_options = [\"--a\", \"--b\"]\n
-		default = true
+		rsync_options = [\"--a\", \"--b\"]
 
 	Additional keywords for an entry in a config file are:\n
 		* source_folder: Explicitly set the source directory to this value\n

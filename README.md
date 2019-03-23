@@ -84,15 +84,15 @@ The available keys are:
 * **`hostname`**: A hostname to be understood by `rsync`. Hint: Use aliases in your `~/.ssh/config/`!
 * **`target_folder`**: The target directory to be syncing to (remote or local).
 * **`rsync_options`**: An array of strings of `rsync` options. They are used in addition to the default, basic options hardcoded into the Python program and the options supplied by the command line call.
-* **`default`**: A boolean (either `true` or `false` or not given) whether or not the current entry is the default. You yourself are responsible for preventing multiple defaults.
 * **`source_folder`**: Usually, Rsync By Config is expected to work from the current directory of invocation. Setting this value changes this behavior explicitly. Useful in combination with `gather`, see next section.
 
 **Note**: `remote_folder` and `local_folder` are deprecated and will be removed soon™! There's a handy little command in the warning to convert config files.
 
-Additionally to the parameters of an entry, *global* parameters true for all entries in the config file can be specified. The parameters need to be specified before the first entry occurs. Currently, only `rsync_options` is supported. Example:
+Additionally to the parameters of an entry, *global* parameters for all entries in the config file can be specified. The parameters need to be specified before the first entry occurs. Currently, a global `rsync_options` and the selection of a `default` entry are supported. The default entry is chosen if no entry is selected dedicatedly via the command line. Example:
 
 ```toml
 rsync_options = ['-v']
+default = "firsthost"
 
 [firsthost]
     hostname = "first"
