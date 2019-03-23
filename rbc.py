@@ -236,9 +236,12 @@ def parseDefaultEntry(verbose, config):
 	for en in config:
 		if "default" in config[en]:
 			if config[en]["default"] is True:
-				entry = en
-				print("# Found default entry {}".format(en))
-				print("Using entry: {}".format(en))
+				print("default key for individual entries is deprecated and not supported anymore. Please set 'default = {}' in your configuration file!".format(en))
+	if "default" in config:
+		default_entry = config["default"]
+		if default_entry in config:
+			print("# Using default host {}".format(default_entry))
+			entry = default_entry
 	return [entry]  # Multi host default entry not yet supported
 
 
