@@ -11,7 +11,7 @@ teardown() {
 
 @test "Default entry" {
 	run ../rbc.py
-	assert_output --partial "# Found default entry lhost"
+	assert_output --partial "# Using default host lhost"
 	assert_success
 }
 

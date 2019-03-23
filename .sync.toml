@@ -1,4 +1,5 @@
 rsync_options = ["-v"]
+default = "secondhost"
 
 [firsthost]
 	hostname = "first"
@@ -9,7 +10,6 @@ rsync_options = ["-v"]
 	hostname = "second"
 	remote_folder = "/something/"
 	rsync_options = ["-v"]
-	default = true
 
 [inversehost]
 	hostname = "second"
